@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="stereo-marker" content="STEREO-APP-OK">
+<title>Стереометрия · сечения, фигуры, доказательства</title>
+<style>
+:root{--bg:#eef0f6;--pan:#fff;--ink:#232640;--mut:#8a8fa8;--ln:#e6e8f2;--acc:#6c5ce7;--acc2:#39d0a7;
+ --warn:#e4572e;--sh:0 8px 28px rgba(40,50,100,.10);--r:16px;--nav:56px}
+body.dark{--bg:#12141c;--pan:#1b1e29;--ink:#e9ebf4;--mut:#878da4;--ln:#2a2f3e;--sh:0 8px 28px rgba(0,0,0,.45)}
+body.blue{--bg:#0b1630;--pan:#122043;--ink:#e7ecff;--mut:#8ea0cc;--ln:#1d2c55;--sh:0 8px 28px rgba(0,0,0,.5)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{margin:0;height:100dvh;background:var(--bg);color:var(--ink);overflow:hidden;overscroll-behavior:none;
+ font:14px/1.45 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+button,select,input,textarea{font:inherit;color:var(--ink);touch-action:manipulation}
+#app{display:flex;gap:10px;padding:10px;height:100%;
+ padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right))}
+aside{background:var(--pan);border-radius:var(--r);box-shadow:var(--sh);display:flex;flex-direction:column;min-height:0}
+#L{width:326px}#R{width:352px}
+main{flex:1;min-width:0;min-height:0;position:relative;background:var(--pan);border-radius:var(--r);
+ box-shadow:var(--sh);overflow:hidden}
+canvas#cv{display:block;touch-action:none;cursor:crosshair}
+.tabs{display:flex;border-bottom:1px solid var(--ln);flex:0 0 auto;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:1;min-width:66px;border:0;background:none;color:var(--mut);padding:12px 4px;font-size:12.5px;
+ cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button.on{color:var(--acc);border-bottom-color:var(--acc);font-weight:600}
+.pane{padding:15px;overflow:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
+.pane.hide{display:none}
+h3{margin:0 0 9px;font-size:16px}
+.lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:15px 0 6px;
+ display:flex;justify-content:space-between;align-items:center}.lbl:first-child{margin-top:0}
+.card{background:var(--bg);border-radius:12px;padding:12px;font-size:13.5px}
+.btn{padding:8px 12px;border:1px solid var(--ln);background:var(--bg);border-radius:10px;cursor:pointer;
+ font-size:13px;transition:.13s;min-height:38px}
+.btn:hover{border-color:var(--acc)}
+.btn:active{transform:scale(.97)}
+.btn.p{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.sm{padding:6px 10px;font-size:12px;min-height:32px}
+.row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+select,input[type=text],input[type=number],textarea{width:100%;padding:8px;border:1px solid var(--ln);
+ border-radius:9px;background:var(--bg);font-size:13px}
+textarea{min-height:74px;font-family:ui-monospace,Consolas,monospace;font-size:12px;resize:vertical}
+.fld{margin-bottom:9px}.fld label{display:block;font-size:12px;color:var(--mut);margin-bottom:3px}
+input[type=range]{width:100%;accent-color:var(--acc);height:26px}
+.lvl{display:flex;gap:6px;margin:12px 0}
+.lvl button{flex:1;padding:9px 4px;border:1px solid var(--ln);background:var(--bg);border-radius:10px;
+ cursor:pointer;font-size:12.5px}
+.lvl button.on{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+#bar{height:5px;background:var(--ln);border-radius:3px;overflow:hidden;margin:12px 0}
+#bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#6c5ce7,#39d0a7);transition:width .35s}
+.rec div{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--ln);font-size:13px}
+.rec span{color:var(--mut)}
+#tools{position:absolute;left:10px;top:58px;display:flex;flex-direction:column;gap:5px;z-index:5;
+ max-height:calc(100% - 120px);overflow:auto;scrollbar-width:none}
+#tools::-webkit-scrollbar{display:none}
+#tools .btn{width:198px;text-align:left;background:var(--pan);opacity:.97;font-size:12.5px}
+#tools .btn.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+#refresh{position:absolute;left:10px;top:10px;z-index:5;width:40px;height:40px;border-radius:12px;
+ background:var(--pan);border:1px solid var(--ln);cursor:pointer;font-size:17px}
+#nav3d{position:absolute;right:12px;bottom:34px;display:flex;flex-direction:column;gap:6px;z-index:5}
+#nav3d .btn{background:var(--pan);width:40px;height:38px;text-align:center;padding:0;font-size:15px;min-height:0}
+#foot{position:absolute;left:0;right:0;bottom:0;height:26px;background:var(--bg);border-top:1px solid var(--ln);
+ display:flex;gap:18px;align-items:center;justify-content:center;font-size:11.5px;color:var(--mut);z-index:4}
+#msg{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);background:#232640f0;color:#fff;
+ padding:9px 18px;border-radius:22px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:40;
+ max-width:78%;text-align:center}
+#mini{position:absolute;right:12px;top:12px;width:236px;background:var(--pan);border:1px solid var(--ln);
+ border-radius:14px;padding:9px;z-index:6;box-shadow:var(--sh);overflow:hidden}
+#mini .hd{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--acc);font-weight:600}
+#mini .sub{font-size:11px;color:var(--mut);margin:2px 0 6px}
+#mini canvas{border-radius:10px;display:block;background:var(--bg)}
+#mini .ct{display:flex;gap:7px;align-items:center;margin-top:7px}
+#mini select{width:86px;padding:4px;font-size:11.5px}
+#miniOpen{position:absolute;right:12px;top:12px;z-index:5;display:none}
+.step{background:var(--bg);border-radius:11px;padding:10px 12px;margin-bottom:8px;border-left:3px solid var(--acc);font-size:13px}
+.step.ok{border-left-color:var(--acc2)}.step.warn{border-left-color:var(--warn)}.step.given{border-left-color:#8a8fa8}
+.step b{display:block;margin-bottom:4px}
+.step em{font-style:normal;color:var(--mut);font-size:12.4px;display:block;margin-top:4px}
+.step .tag{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);display:block;margin-bottom:3px}
+kbd{background:var(--bg);border:1px solid var(--ln);border-bottom-width:2px;border-radius:5px;padding:0 5px;font-size:11px}
+.sw{display:flex;align-items:center;gap:9px;margin-bottom:9px;font-size:13px}
+.sw input{width:auto;accent-color:var(--acc);width:20px;height:20px}
+.hint{font-size:12px;color:var(--mut);line-height:1.6}
+.eye{cursor:pointer;user-select:none;padding:2px 6px}
+.grab{display:none}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:var(--ln);border-radius:9px}
+#scrim{display:none;position:fixed;inset:0;background:rgba(10,12,22,.45);z-index:25}
+#scrim.on{display:block}
+#mbar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:32;background:var(--pan);
+ border-top:1px solid var(--ln);align-items:stretch;padding-bottom:env(safe-area-inset-bottom)}
+#mbar button{flex:1;border:0;background:none;color:var(--mut);font-size:10.5px;display:flex;
+ flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:var(--nav);cursor:pointer}
+#mbar button i{font-style:normal;font-size:18px;line-height:1}
+#mbar button.on{color:var(--acc)}
+#fsBtn{display:none}
+
+/* ---------- ОБЩЕЕ ДЛЯ МОБИЛЬНЫХ ---------- */
+body.mob #app{padding:0;gap:0}
+body.mob main{border-radius:0}
+body.mob #foot{display:none}
+body.mob #mbar{display:flex}
+body.mob #refresh{width:44px;height:44px}
+body.mob #nav3d .btn{width:46px;height:44px;font-size:18px}
+body.mob #tools{flex-direction:row;left:0;right:0;top:auto;max-height:none;overflow-x:auto;overflow-y:hidden;
+ padding:8px 10px;gap:8px;background:linear-gradient(0deg,var(--pan) 45%,transparent)}
+body.mob #tools .btn{width:auto;white-space:nowrap;flex:0 0 auto;font-size:12.5px;padding:10px 14px;border-radius:13px}
+body.mob #mini{width:170px;padding:7px;right:9px;top:9px}
+body.mob #mini .sub{display:none}
+body.mob #fsBtn{display:block;position:absolute;z-index:5;width:46px;height:44px;border-radius:12px;
+ background:var(--pan);border:1px solid var(--ln);font-size:17px}
+
+/* ---------- АЛЬБОМНАЯ ОРИЕНТАЦИЯ ---------- */
+body.lay-land aside{position:fixed;top:0;bottom:0;z-index:30;width:min(370px,86vw);border-radius:0;
+ transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.35)}
+body.lay-land #L{left:0;transform:translateX(-102%)}
+body.lay-land #R{right:0;transform:translateX(102%)}
+body.lay-land aside.open{transform:translateX(0)}
+body.lay-land #mbar{flex-direction:column;left:auto;right:0;top:0;bottom:0;width:var(--nav);
+ border-top:0;border-left:1px solid var(--ln);padding-bottom:0}
+body.lay-land #mbar button{min-height:0;font-size:9px;padding:4px 2px}
+body.lay-land main{margin-right:var(--nav)}
+body.lay-land #tools{bottom:0}
+body.lay-land #nav3d{bottom:62px;right:9px}
+body.lay-land #fsBtn{bottom:62px;left:9px}
+
+/* ---------- ПОРТРЕТНАЯ ОРИЕНТАЦИЯ ---------- */
+body.lay-port #app{flex-direction:column}
+body.lay-port main{flex:1 1 auto;margin-bottom:calc(var(--nav) + env(safe-area-inset-bottom))}
+body.lay-port aside{position:fixed;left:0;right:0;width:auto;z-index:30;
+ bottom:calc(var(--nav) + env(safe-area-inset-bottom));height:var(--shH,52dvh);
+ border-radius:18px 18px 0 0;transform:translateY(calc(100% + var(--nav)));transition:transform .26s ease}
+body.lay-port aside.open{transform:translateY(0)}
+body.lay-port .grab{display:block;height:22px;flex:0 0 auto;cursor:grab;touch-action:none;position:relative}
+body.lay-port .grab:after{content:"";position:absolute;left:50%;top:9px;transform:translateX(-50%);
+ width:42px;height:4px;border-radius:4px;background:var(--ln)}
+body.lay-port #tools{bottom:calc(var(--nav) + env(safe-area-inset-bottom))}
+body.lay-port #nav3d{bottom:calc(var(--nav) + 64px);right:9px;flex-direction:row;flex-wrap:wrap;width:100px;justify-content:flex-end}
+body.lay-port #fsBtn{bottom:calc(var(--nav) + 64px);left:9px}
+body.lay-port #msg{bottom:calc(var(--nav) + 118px)}
+body.lay-land #msg{bottom:66px}
+</style>
+</head>
+<body>
+<div id="scrim"></div>
+<div id="app">
+<aside id="L">
+ <div class="grab"></div>
+ <div class="tabs">
+  <button data-p="task" class="on">Задание</button><button data-p="gen">Генератор</button>
+  <button data-p="fig">Фигура</button><button data-p="meas">Измер.</button><button data-p="cfg">Вид</button>
+ </div>
+ <div class="pane" id="p-task">
+  <h3 id="t-title">Задание 1</h3>
+  <div class="card" id="t-text"></div>
+  <div class="lvl" id="t-lvl"><button data-l="0">🌱 Новичок</button><button data-l="1" class="on">★ Знаток</button><button data-l="2">♛ Профи</button></div>
+  <div class="lbl">Навигатор <span class="eye" id="t-eye">👁</span></div>
+  <div class="card" id="t-nav"></div>
+  <div id="bar"><i></i></div>
+  <div class="row"><button class="btn" id="t-step">▶ Следующий шаг</button>
+   <button class="btn" id="t-ans">Ответ</button><button class="btn" id="t-new">⟳ Новое</button></div>
+  <div class="lbl">Записи построения</div><div class="rec" id="t-rec"></div>
+  <div class="hint" id="t-cnt" style="margin-top:8px"></div>
+  <div class="lbl">Управление</div><div class="hint" id="t-help"></div>
+ </div>
+ <div class="pane hide" id="p-gen">
+  <h3>Генератор заданий</h3>
+  <div class="fld"><label>Метод построения</label><select id="g-method">
+   <option value="trace">Метод следов</option><option value="parallel">Метод параллельных прямых</option>
+   <option value="perp">Перпендикуляр / перпендикулярное сечение</option><option value="any">Смешанный</option></select></div>
+  <div class="fld"><label>Сложность</label><select id="g-level">
+   <option value="0">Новичок — точки попарно в гранях</option><option value="1" selected>Знаток — нужен один след</option>
+   <option value="2">Профи — ни одной пары в общей грани</option></select></div>
+  <div class="fld"><label>Тело</label><select id="g-fig"></select></div>
+  <div class="row"><button class="btn p" id="g-make">Сгенерировать</button><button class="btn" id="g-seed">Повторить seed</button></div>
+  <div class="card hint">Подбирается тело и точки так, чтобы сечение существовало, было невырожденным и требовало выбранного метода.</div>
+  <div class="lbl">Серия</div><div class="row"><button class="btn sm" id="g-5">Сделать 5 заданий</button></div>
+  <div class="rec" id="g-list"></div>
+ </div>
+ <div class="pane hide" id="p-fig">
+  <h3>Конструктор фигуры</h3>
+  <div class="fld"><label>Готовое тело</label><select id="b-preset"></select></div>
+  <div class="lbl">1 · основание</div>
+  <div class="fld"><label>Тип</label><select id="b-base"><option value="reg">Правильный n-угольник</option>
+   <option value="rect">Прямоугольник a×b</option><option value="custom">Свои вершины «x y»</option></select></div>
+  <div id="b-reg"><div class="g2">
+   <div class="fld"><label>n = <b id="l-n">4</b></label><input type="range" id="b-n" min="3" max="12" value="4"></div>
+   <div class="fld"><label>Радиус R</label><input type="number" id="b-R" value="1.15" step=".05"></div></div>
+   <div class="fld"><label>Поворот, °</label><input type="range" id="b-rot" min="0" max="180" value="45"></div></div>
+  <div id="b-rect" style="display:none" class="g2">
+   <div class="fld"><label>a</label><input type="number" id="b-a" value="2" step=".1"></div>
+   <div class="fld"><label>b</label><input type="number" id="b-b" value="1.4" step=".1"></div></div>
+  <div id="b-cust" style="display:none"><div class="fld"><label>Вершины основания</label>
+   <textarea id="b-pts">-1 -1
+1 -1
+1.3 0.9
+-0.6 1.2</textarea></div></div>
+  <div class="lbl">2 · тело</div>
+  <div class="fld"><label>Тип</label><select id="b-body"><option value="prism">Призма</option>
+   <option value="pyr">Пирамида</option><option value="frus">Усечённая пирамида</option>
+   <option value="hull">Выпуклая оболочка точек</option></select></div>
+  <div id="b-par"><div class="g2">
+   <div class="fld"><label>Высота h</label><input type="number" id="b-h" value="2" step=".1"></div>
+   <div class="fld"><label>k (усечение)</label><input type="number" id="b-k" value=".5" step=".05"></div></div>
+   <div class="g2"><div class="fld"><label>Скос x</label><input type="number" id="b-sx" value="0" step=".1"></div>
+   <div class="fld"><label>Скос y</label><input type="number" id="b-sy" value="0" step=".1"></div></div></div>
+  <div id="b-hull" style="display:none"><div class="fld"><label>Точки «x y z»</label>
+   <textarea id="b-hpts">-1 -1 -1
+1 -1 -1
+1 1 -1
+-1 1 -1
+0 0 1.4
+-.6 .6 .9</textarea></div></div>
+  <div class="row" style="margin-top:12px"><button class="btn p" id="b-make">Построить</button>
+   <button class="btn" id="b-step">▶ Этап</button><button class="btn" id="b-all">Готово ⏭</button></div>
+  <div class="hint">Каждый этап добавляет элементы тела и строгую запись с обоснованием.</div>
+ </div>
+ <div class="pane hide" id="p-meas"><h3>Измерения</h3>
+  <div class="row"><button class="btn p" id="m-calc">Пересчитать</button></div>
+  <div class="rec" id="m-out"></div><div class="lbl">Как считается</div><div class="hint" id="m-why"></div></div>
+ <div class="pane hide" id="p-cfg"><h3>Вид и оформление</h3><div id="cfg-box"></div>
+  <div class="lbl">Файлы</div>
+  <div class="row"><button class="btn" id="e-png">PNG</button><button class="btn" id="e-save">Сохранить</button>
+   <button class="btn" id="e-load">Открыть</button><button class="btn" id="e-txt">Док-во .txt</button></div>
+  <input type="file" id="e-file" accept=".json" style="display:none"></div>
+</aside>
+
+<main>
+ <button id="refresh" title="Начать заново">⟳</button>
+ <button id="fsBtn" title="Во весь экран">⛶</button>
+ <div id="tools"></div>
+ <canvas id="cv"></canvas>
+ <div id="mini">
+  <div class="hd"><span>◳ 3D-ВИТРИНА</span><span class="eye" id="mini-x">✕</span></div>
+  <div class="sub">Смотри, что получилось</div>
+  <canvas id="mcv"></canvas>
+  <div class="ct"><input type="range" id="mini-r" min="0" max="628" value="60">
+   <select id="mini-v"><option value="free">вращение</option><option value="top">сверху</option>
+    <option value="front">спереди</option><option value="sec">по сечению</option></select></div>
+ </div>
+ <button class="btn" id="miniOpen">◳ Витрина</button>
+ <div id="nav3d"><button class="btn" id="n-in">＋</button><button class="btn" id="n-out">－</button>
+  <button class="btn" id="n-home">⌂</button><button class="btn" id="n-fit">⤢</button><button class="btn" id="n-rot">⟲</button></div>
+ <div id="foot"><span>✥ Перемещение: пробел + ЛКМ</span><span>🔍 Зум: колесо</span><span>⟳ Вращение: ЛКМ</span></div>
+ <div id="msg"></div>
+</main>
+
+<aside id="R">
+ <div class="grab"></div>
+ <div class="tabs"><button data-q="proof" class="on">Доказательство</button><button data-q="log">Мой протокол</button></div>
+ <div class="pane" id="q-proof"></div><div class="pane hide" id="q-log"></div>
+ <div style="padding:10px;border-top:1px solid var(--ln)" class="row">
+  <button class="btn sm" id="pr-copy">Копировать</button><button class="btn sm" id="pr-print">Печать</button>
+  <button class="btn sm" id="pr-clear">Очистить</button></div>
+</aside>
+</div>
+
+<nav id="mbar">
+ <button data-m="task"><i>📋</i>Задание</button>
+ <button data-m="tools" class="on"><i>✏️</i>Чертёж</button>
+ <button data-m="gen"><i>🎲</i>Генератор</button>
+ <button data-m="proof"><i>📐</i>Док-во</button>
+ <button data-m="cfg"><i>⚙️</i>Вид</button>
+</nav>
+
+<script>
+"use strict";
+/*=========== 1. МАТЕМАТИКА ===========*/
+const ad=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]], sb=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+const ml=(a,k)=>[a[0]*k,a[1]*k,a[2]*k], dt=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const cr=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const L=a=>Math.hypot(a[0],a[1],a[2]), nz=a=>{const l=L(a)||1;return ml(a,1/l)};
+const lp=(a,b,t)=>ad(a,ml(sb(b,a),t)), ds=(a,b)=>L(sb(a,b));
+const rnd=(x,k=3)=>Math.round(x*10**k)/10**k, cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fin3=p=>!!p&&p.every(Number.isFinite);
+let EPS=1e-4;
+const polyArea=P=>{let s=[0,0,0];for(let i=1;i<P.length-1;i++)s=ad(s,cr(sb(P[i],P[0]),sb(P[i+1],P[0])));return L(s)/2;};
+const polyN=P=>{let s=[0,0,0];for(let i=1;i<P.length-1;i++)s=ad(s,cr(sb(P[i],P[0]),sb(P[i+1],P[0])));return nz(s);};
+const polyPer=P=>{let s=0;for(let i=0;i<P.length;i++)s+=ds(P[i],P[(i+1)%P.length]);return s;};
+function clipPoly(P,n,d){const o=[],N=P.length;for(let i=0;i<N;i++){const a=P[i],b=P[(i+1)%N],
+ sa=dt(n,a)-d,sB=dt(n,b)-d;if(sa<=EPS)o.push(a);
+ if((sa<-EPS&&sB>EPS)||(sa>EPS&&sB<-EPS))o.push(lp(a,b,sa/(sa-sB)));}return o;}
+function volFaces(F){let V=0;for(const P of F)for(let i=1;i<P.length-1;i++)V+=dt(P[0],cr(P[i],P[i+1]))/6;return Math.abs(V);}
+function lineInt(p1,p2,q1,q2,tol){const u=sb(p2,p1),v=sb(q2,q1),w=sb(p1,q1);
+ const a=dt(u,u),b=dt(u,v),c=dt(v,v),d=dt(u,w),e=dt(v,w),den=a*c-b*b;
+ if(Math.abs(den)<1e-12)return null;
+ const t1=(b*e-c*d)/den,t2=(a*e-b*d)/den,X=ad(p1,ml(u,t1)),Y=ad(q1,ml(v,t2));
+ if(ds(X,Y)>(tol||EPS*8))return null;return{p:ml(ad(X,Y),.5),t1,t2};}
+function hull2(P){P=P.slice().sort((a,b)=>a.x-b.x||a.y-b.y);const c=(o,a,b)=>(a.x-o.x)*(b.y-o.y)-(a.y-o.y)*(b.x-o.x);
+ const lo=[];for(const p of P){while(lo.length>1&&c(lo[lo.length-2],lo[lo.length-1],p)<=0)lo.pop();lo.push(p);}
+ const up=[];for(let i=P.length-1;i>=0;i--){const p=P[i];while(up.length>1&&c(up[up.length-2],up[up.length-1],p)<=0)up.pop();up.push(p);}
+ lo.pop();up.pop();return lo.concat(up);}
+function hull3(pts){const n=pts.length;if(n<4)return null;
+ let i1=-1;for(let i=1;i<n;i++)if(ds(pts[i],pts[0])>1e-9){i1=i;break;}if(i1<0)return null;
+ let i2=-1;for(let i=0;i<n;i++){if(i===0||i===i1)continue;if(L(cr(sb(pts[i1],pts[0]),sb(pts[i],pts[0])))>1e-7){i2=i;break;}}
+ if(i2<0)return null;const N0=nz(cr(sb(pts[i1],pts[0]),sb(pts[i2],pts[0])));
+ let i3=-1,bst=1e-7;for(let i=0;i<n;i++){const v=Math.abs(dt(N0,sb(pts[i],pts[0])));if(v>bst){bst=v;i3=i;}}
+ if(i3<0)return null;let F=[[0,i1,i2],[0,i2,i3],[0,i3,i1],[i1,i3,i2]];
+ const C=ml(ad(ad(pts[0],pts[i1]),ad(pts[i2],pts[i3])),.25);
+ F=F.map(f=>{const N=cr(sb(pts[f[1]],pts[f[0]]),sb(pts[f[2]],pts[f[0]]));return dt(N,sb(pts[f[0]],C))<0?[f[0],f[2],f[1]]:f;});
+ const vis=(f,p)=>dt(cr(sb(pts[f[1]],pts[f[0]]),sb(pts[f[2]],pts[f[0]])),sb(p,pts[f[0]]))>1e-9;
+ for(let i=0;i<n;i++){if([0,i1,i2,i3].includes(i))continue;const p=pts[i],V=F.filter(f=>vis(f,p));if(!V.length)continue;
+  const es=new Map();V.forEach(f=>{for(let k=0;k<3;k++)es.set(f[k]+'_'+f[(k+1)%3],[f[k],f[(k+1)%3]]);});
+  const hz=[];es.forEach(([a,b])=>{if(!es.has(b+'_'+a))hz.push([a,b]);});
+  F=F.filter(f=>!V.includes(f));hz.forEach(([a,b])=>F.push([a,b,i]));}
+ const gr=new Map();
+ F.forEach(f=>{const N=nz(cr(sb(pts[f[1]],pts[f[0]]),sb(pts[f[2]],pts[f[0]])));
+  const k=[rnd(N[0],2),rnd(N[1],2),rnd(N[2],2),rnd(dt(N,pts[f[0]]),2)].join(',');
+  if(!gr.has(k))gr.set(k,[]);gr.get(k).push(f);});
+ const out=[];
+ gr.forEach(g=>{const cnt=new Map();g.forEach(f=>{for(let k=0;k<3;k++)cnt.set(f[k]+'_'+f[(k+1)%3],[f[k],f[(k+1)%3]]);});
+  const bd=[];cnt.forEach(([a,b])=>{if(!cnt.has(b+'_'+a))bd.push([a,b]);});if(!bd.length)return;
+  const nx=new Map(bd.map(([a,b])=>[a,b])),st=bd[0][0],poly=[st];let c=nx.get(st),g2=0;
+  while(c!==undefined&&c!==st&&g2++<999){poly.push(c);c=nx.get(c);}
+  if(poly.length>=3)out.push(poly);});
+ return out;}
+
+/*=========== 2. СОСТОЯНИЕ ===========*/
+const CFG=Object.assign({theme:'light',proj:'ortho',style:'glass',hidden:'dash',faceOp:.15,secOp:.28,
+ edgeW:2,ptR:6,fs:14,labels:true,grid:true,shadow:true,axes:false,light:true,glow:true,rot:false,mini:true,
+ edgeCol:'#2b2f66',secCol:'#e4572e',auxCol:'#9aa0c0',ptCol:'#e74c4c'},JSON.parse(localStorage.getItem('stCfg')||'{}'));
+const A={P:[],F:[],Ln:[],alpha:null,goal:null,stage:0,maxStage:0,size:2,center:[0,0,0],
+ tool:'line',sel:[],acts:0,good:0,done:false,ans:false,free:false,level:1,hintOn:true,
+ secSegs:[],secPoly:[],plan:[],planI:0,proof:[],log:[],given:[],taskText:'',taskNo:1,figName:'',
+ hist:[],fut:[],method:'trace',seed:1,stageSteps:[],stepPtr:0,series:[],rec:null};
+let uid=0,dirty=true,uiDirty=true,hover=null,tNow=0,MOB=false,LAY='';
+const cam={az:-1.12,el:.3,sc:150,px:0,py:0},mcam={az:-1.0,el:.34,sc:60,px:0,py:0};
+let camT=null;
+const pt=id=>A.P.find(p=>p.id===id);
+const POOL='TKQRUVWXYZGHIJLEFO'.split('');
+const freeName=ex=>{const u=A.P.map(p=>p.name).concat(ex||[]);return POOL.find(c=>!u.includes(c))||('P'+(++uid));};
+function addPoint(p,name,kind){const e=A.P.find(q=>ds(q.p,p)<EPS*A.size*6&&q.st<=A.stage);if(e)return e;
+ const o={id:++uid,p,name:name||freeName(),kind:kind||'user',st:A.maxStage};A.P.push(o);return o;}
+let _s=1;const srand=s=>{_s=s>>>0||1};
+const rnd01=()=>{_s^=_s<<13;_s>>>=0;_s^=_s>>17;_s^=_s<<5;_s>>>=0;return _s/4294967296;};
+const pick=a=>a[Math.floor(rnd01()*a.length)%a.length];
+const log=(t,w,c)=>{A.log.push({t,w:w||'',c:c||''});uiDirty=true;};
+const proofBlock=(tag,t,w,c)=>{A.proof.push({tag,t,w:w||'',c:c||''});uiDirty=true;};
+const renderSteps=(el,arr,empty)=>{el.innerHTML=arr.map((s,i)=>
+ `<div class="step ${s.c||''}">${s.tag?`<span class="tag">${s.tag}</span>`:''}<b>${i+1}. ${s.t}</b>${s.w?`<em>${s.w}</em>`:''}</div>`).join('')
+ ||`<div class="hint">${empty}</div>`;};
+
+/*=========== 3. ФИГУРЫ ===========*/
+const S1='₁';
+const regPoly=(n,R,rot)=>{const a=[];for(let i=0;i<n;i++){const t=rot+2*Math.PI*i/n;a.push([R*Math.cos(t),R*Math.sin(t),0]);}return a;};
+const bNames=n=>{const s=[];for(let i=0;i<n;i++)s.push(String.fromCharCode(65+i));return s;};
+function makeFigure(rec){
+ A.P=[];A.F=[];A.Ln=[];A.sel=[];A.acts=0;A.good=0;A.done=false;A.ans=false;A.alpha=null;A.goal=null;
+ A.plan=[];A.planI=0;A.proof=[];A.log=[];A.given=[];uid=0;A.hist=[];A.fut=[];A.rec=rec;
+ const V={},E=[],FS=[],ST=[];
+ if(rec.body==='hull'){
+  const pts=rec.hpts,nm=pts.map((_,i)=>String.fromCharCode(65+i));
+  pts.forEach((p,i)=>V[nm[i]]={p,st:0});
+  const f=hull3(pts);if(!f){say('Точки компланарны — тело не строится.');return;}
+  f.forEach(poly=>{FS.push({v:poly.map(i=>nm[i]),st:1});
+   for(let i=0;i<poly.length;i++)E.push([nm[poly[i]],nm[poly[(i+1)%poly.length]],1]);});
+  ST.push({t:'Отмечаем данные точки',w:'Точки не лежат в одной плоскости, поэтому определяют невырожденное тело.'});
+  ST.push({t:'Строим выпуклую оболочку',w:'Каждая грань лежит в опорной плоскости: все прочие точки — в одном полупространстве относительно неё, значит грани плоские, а тело выпукло.'});
+  A.figName='Выпуклая оболочка';
+ }else{
+  const B=rec.base,n=B.length,nm=bNames(n);
+  B.forEach((p,i)=>V[nm[i]]={p,st:0});
+  for(let i=0;i<n;i++)E.push([nm[i],nm[(i+1)%n],0]);FS.push({v:nm.slice(),st:0});
+  ST.push({t:`Строим основание ${nm.join('')}`,
+   w:'Три его вершины не лежат на одной прямой ⇒ через них проходит единственная плоскость π (аксиома A₁); остальные вершины строим в этой же плоскости.'});
+  if(rec.body==='prism'){const v=[rec.sx,rec.sy,rec.h],tn=nm.map(x=>x+S1);
+   nm.forEach((x,i)=>{V[tn[i]]={p:ad(B[i],v),st:1};E.push([x,tn[i],1]);});
+   for(let i=0;i<n;i++)E.push([tn[i],tn[(i+1)%n],2]);
+   FS.push({v:tn.slice(),st:2});for(let i=0;i<n;i++)FS.push({v:[nm[i],nm[(i+1)%n],tn[(i+1)%n],tn[i]],st:2});
+   ST.push({t:'Откладываем равные параллельные боковые рёбра',
+    w:`Верхнее основание получено параллельным переносом на вектор v, поэтому ${nm[0]}${tn[0]}∥${nm[1]}${tn[1]}∥… и все эти отрезки равны.`});
+   ST.push({t:'Достраиваем верхнее основание и боковые грани',
+    w:`Перенос переводит многоугольник в равный, а его плоскость — в параллельную: (${nm.join('')})∥(${tn.join('')}). Каждая боковая грань — параллелограмм.`+
+      (rec.sx===0&&rec.sy===0?' Боковые рёбра ⟂ основанию ⇒ призма прямая.':' Боковые рёбра наклонены ⇒ призма наклонная.')});
+   A.figName='Призма '+nm.join('')+tn.join('');}
+  if(rec.body==='pyr'){V['S']={p:[rec.sx,rec.sy,rec.h],st:1};nm.forEach(x=>E.push([x,'S',1]));
+   nm.forEach((x,i)=>FS.push({v:['S',x,nm[(i+1)%n]],st:2}));
+   ST.push({t:'Берём точку S вне плоскости основания',w:'Существует точка, не принадлежащая данной плоскости (следствие аксиом стереометрии); она будет вершиной пирамиды.'});
+   ST.push({t:'Соединяем S с вершинами основания',w:'Точка S и каждая сторона основания задают единственную плоскость (A₁) — боковые грани, все они треугольники.'});
+   A.figName='Пирамида S'+nm.join('');}
+  if(rec.body==='frus'){const ap=[rec.sx,rec.sy,rec.h],k=cl(rec.k,.1,.9),tn=nm.map(x=>x+S1);
+   V['S']={p:ap,st:1,hide:3};nm.forEach(x=>E.push([x,'S',1,3]));
+   nm.forEach((x,i)=>{V[tn[i]]={p:lp(B[i],ap,k),st:2};});
+   for(let i=0;i<n;i++)E.push([tn[i],tn[(i+1)%n],2]);
+   nm.forEach((x,i)=>E.push([x,tn[i],3]));
+   FS.push({v:tn.slice(),st:3});for(let i=0;i<n;i++)FS.push({v:[nm[i],nm[(i+1)%n],tn[(i+1)%n],tn[i]],st:3});
+   ST.push({t:'Достраиваем полную пирамиду с вершиной S',w:'Усечённая пирамида — часть пирамиды между основанием и секущей плоскостью, параллельной основанию.'});
+   ST.push({t:'Проводим плоскость, параллельную основанию',
+    w:`Две параллельные плоскости, пересечённые третьей, дают параллельные линии пересечения ⇒ ${tn[0]}${tn[1]}∥${nm[0]}${nm[1]}; верхнее основание подобно нижнему с k=${k}.`});
+   ST.push({t:'Отбрасываем верхнюю пирамиду',w:'Боковые грани усечённой пирамиды — трапеции: их основания лежат на параллельных прямых одной плоскости.'});
+   A.figName='Усечённая пирамида '+nm.join('')+tn.join('');}
+ }
+ A.maxStage=Math.max(0,...FS.map(f=>f.st),...E.map(e=>e[2]));
+ const ids={};for(const n in V){const o={id:++uid,p:V[n].p,name:n,kind:'vertex',st:V[n].st,hide:V[n].hide};A.P.push(o);ids[n]=o.id;}
+ let C=[0,0,0];A.P.forEach(p=>C=ad(C,p.p));C=ml(C,1/A.P.length);A.center=C;
+ A.size=Math.max(...A.P.map(p=>ds(p.p,C)))*2;
+ FS.forEach(f=>{const Pv=f.v.map(n=>V[n].p);let N=nz(cr(sb(Pv[1],Pv[0]),sb(Pv[2],Pv[0])));
+  let fc=[0,0,0];Pv.forEach(p=>fc=ad(fc,p));fc=ml(fc,1/Pv.length);let vs=f.v.slice();
+  if(dt(N,sb(fc,C))<0){vs.reverse();N=ml(N,-1);}
+  A.F.push({v:vs.map(n=>ids[n]),names:vs,n:N,d:dt(N,Pv[0]),name:'('+vs.join('')+')',st:f.st,c:fc});});
+ const seen=new Set();
+ E.forEach(([a,b,st,hide])=>{const k=[a,b].sort().join('|');if(seen.has(k))return;seen.add(k);
+  A.Ln.push({id:++uid,a:ids[a],b:ids[b],kind:'edge',ext:false,st,hide,fs:[]});});
+ A.Ln.forEach(l=>A.F.forEach((f,i)=>{if(f.v.includes(l.a)&&f.v.includes(l.b))l.fs.push(i);}));
+ A.stage=0;A.stageSteps=ST;A.stepPtr=0;
+ proofBlock('Фигура',A.figName,'Построение по этапам — кнопка «▶ Этап» во вкладке «Фигура».','given');
+ dirty=uiDirty=true;fitCam(cam,W,H);}
+const visP=p=>p.st<=A.stage&&(p.hide===undefined||A.stage<p.hide);
+const visL=l=>l.st<=A.stage&&(l.hide===undefined||A.stage<l.hide);
+const visF=f=>f.st<=A.stage;
+const applyStage=s=>{A.stage=cl(s,0,A.maxStage);computeSection();dirty=uiDirty=true;};
+function nextStage(){if(A.stage>=A.maxStage)return say('Фигура построена полностью.');
+ applyStage(A.stage+1);if(A.stepPtr<A.stageSteps.length){const s=A.stageSteps[A.stepPtr++];proofBlock('Этап '+A.stage,s.t,s.w);}}
+function finishStages(){while(A.stepPtr<A.stageSteps.length){const s=A.stageSteps[A.stepPtr++];proofBlock('Этап',s.t,s.w);}applyStage(A.maxStage);}
+const REC={
+ tetra:{t:'Тетраэдр',base:regPoly(3,1.25,1.9).map(p=>[p[0],p[1],-.9]),body:'pyr',h:1.05,sx:.05,sy:.05},
+ cube:{t:'Куб',base:[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1]],body:'prism',h:2,sx:0,sy:0},
+ box:{t:'Параллелепипед',base:[[-1.2,-.85,-1],[1.2,-.85,-1],[1.2,.85,-1],[-1.2,.85,-1]],body:'prism',h:2.1,sx:0,sy:0},
+ obl:{t:'Наклонный параллелепипед',base:[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1]],body:'prism',h:1.9,sx:.85,sy:.3},
+ pyr4:{t:'Пирамида 4-угольная',base:[[-1.1,-1.1,-.8],[1.1,-1.1,-.8],[1.1,1.1,-.8],[-1.1,1.1,-.8]],body:'pyr',h:1.5,sx:0,sy:0},
+ pyr6:{t:'Пирамида 6-угольная',base:regPoly(6,1.15,0).map(p=>[p[0],p[1],-.9]),body:'pyr',h:1.5,sx:.1,sy:0},
+ prism3:{t:'Призма 3-угольная',base:regPoly(3,1.2,1.9).map(p=>[p[0],p[1],-1]),body:'prism',h:2,sx:0,sy:0},
+ prism6:{t:'Призма 6-угольная',base:regPoly(6,1.1,0).map(p=>[p[0],p[1],-1]),body:'prism',h:2,sx:0,sy:0},
+ frus4:{t:'Усечённая пирамида',base:[[-1.2,-1.2,-1],[1.2,-1.2,-1],[1.2,1.2,-1],[-1.2,1.2,-1]],body:'frus',h:1.6,k:.55,sx:0,sy:0}};
+const PRISMS=['cube','box','obl','prism3','prism6'],ALLF=Object.keys(REC);
+
+/*=========== 4. СЕЧЕНИЕ ===========*/
+function faceCut(f,pl){const P=f.v.map(id=>pt(id).p),sd=P.map(v=>dt(pl.n,v)-pl.d),o=[],e=EPS*A.size;
+ for(let i=0;i<P.length;i++){const j=(i+1)%P.length;
+  if(Math.abs(sd[i])<e)o.push(P[i]);
+  else if(sd[i]*sd[j]<0&&Math.abs(sd[j])>=e)o.push(lp(P[i],P[j],sd[i]/(sd[i]-sd[j])));}
+ const u=[];o.forEach(p=>{if(!u.some(q=>ds(p,q)<e))u.push(p)});
+ return u.length>=2?[u[0],u[u.length-1]]:null;}
+function computeSection(){A.secSegs=[];A.secPoly=[];
+ if(!A.alpha||A.stage<A.maxStage||!fin3(A.alpha.n)){checkDone();return;}
+ A.F.forEach((f,i)=>{const s=faceCut(f,A.alpha);if(s&&fin3(s[0])&&fin3(s[1]))A.secSegs.push({a:s[0],b:s[1],f:i});});
+ const sg=A.secSegs.slice();if(!sg.length){checkDone();return;}
+ let poly=[sg[0].a,sg[0].b];sg.shift();const e=EPS*A.size*4;
+ while(sg.length){const c=poly[poly.length-1];
+  const i=sg.findIndex(s=>ds(s.a,c)<e||ds(s.b,c)<e);if(i<0)break;
+  const s=sg.splice(i,1)[0];poly.push(ds(s.a,c)<e?s.b:s.a);}
+ if(poly.length>2&&ds(poly[0],poly[poly.length-1])<e)poly.pop();
+ if(poly.some(p=>!fin3(p)||ds(p,A.center)>A.size*1.2))poly=[];
+ if(poly.length>2&&dt(polyN(poly),A.alpha.n)<0)poly.reverse();
+ A.secPoly=poly;checkDone();}
+const secOK=()=>A.secPoly.length>2&&A.secPoly.every(p=>fin3(p)&&ds(p,A.center)<=A.size*1.2);
+const onAlpha=p=>A.alpha&&Math.abs(dt(A.alpha.n,p)-A.alpha.d)<EPS*A.size*6;
+const covered=(a,b)=>A.Ln.some(l=>{if(l.kind==='aux'||!visL(l))return false;
+ const A0=pt(l.a).p,d=sb(pt(l.b).p,A0),dd=dt(d,d)||1;
+ const ok=x=>{const t=dt(sb(x,A0),d)/dd;return ds(x,ad(A0,ml(d,t)))<EPS*A.size*7&&(l.ext||(t>-1e-3&&t<1+1e-3));};
+ return ok(a)&&ok(b);});
+function checkDone(){
+ if(A.goal&&A.goal.type==='perp'){
+  const H=A.P.find(p=>ds(p.p,A.goal.H)<EPS*A.size*8);
+  const ok=H&&A.Ln.some(l=>(l.a===A.goal.M&&l.b===H.id)||(l.b===A.goal.M&&l.a===H.id));
+  A.prog=H?(ok?1:.5):0;
+  if(ok&&!A.done){A.done=true;A.goal.Hname=H.name;emitPerpProof(H.name);say('🎉 Перпендикуляр построен!');measure();}
+  uiDirty=true;return;}
+ if(!A.secSegs.length){A.prog=0;uiDirty=true;return;}
+ const ok=A.secSegs.filter(s=>covered(s.a,s.b)).length;A.prog=ok/A.secSegs.length;
+ if(ok===A.secSegs.length&&!A.done){A.done=true;say('🎉 Сечение построено верно!');
+  log('Сечение построено','Все стороны найдены — задача решена.','ok');measure();}
+ if(ok<A.secSegs.length)A.done=false;uiDirty=true;}
+
+/*=========== 5. ПЛАН И ДОКАЗАТЕЛЬСТВО ===========*/
+const KEY=p=>p.map(x=>Math.round(x*1e3)).join(',');
+const edgesOfFace=fi=>A.Ln.filter(l=>l.kind==='edge'&&l.fs.includes(fi));
+const edgeAt=(p,fi)=>edgesOfFace(fi).find(l=>{const a=pt(l.a).p,d=sb(pt(l.b).p,a);
+ const t=dt(sb(p,a),d)/(dt(d,d)||1);return t>-1e-3&&t<1+1e-3&&ds(p,ad(a,ml(d,t)))<EPS*A.size*6;});
+const eName=l=>l?pt(l.a).name+pt(l.b).name:'ребро';
+function buildPlan(){A.plan=[];A.planI=0;A.vname=new Map();
+ if(!A.alpha||!A.secSegs.length)return;
+ const nm=p=>{const k=KEY(p);if(A.vname.has(k))return A.vname.get(k);
+  const ex=A.P.find(q=>ds(q.p,p)<EPS*A.size*6);const n=ex?ex.name:freeName([...A.vname.values()]);
+  A.vname.set(k,n);return n;};
+ A.secSegs.forEach(s=>{nm(s.a);nm(s.b);});
+ const known=new Set();
+ A.secSegs.forEach(s=>[s.a,s.b].forEach(p=>{const ex=A.P.find(q=>ds(q.p,p)<EPS*A.size*6&&(q.kind==='task'||q.kind==='vertex'));if(ex)known.add(KEY(p));}));
+ const built=new Set();let guard=0;
+ while(built.size<A.secSegs.length&&guard++<60){let did=false;
+  A.secSegs.forEach((s,i)=>{if(built.has(i)||did)return;
+   if(known.has(KEY(s.a))&&known.has(KEY(s.b))){A.plan.push({kind:'connect',i,X:s.a,Y:s.b,f:s.f,nx:nm(s.a),ny:nm(s.b)});built.add(i);did=true;}});
+  if(did)continue;
+  if(A.method==='parallel'){A.secSegs.forEach((s,i)=>{if(built.has(i)||did)return;
+    const kx=known.has(KEY(s.a)),ky=known.has(KEY(s.b));if(kx===ky)return;
+    const X=kx?s.a:s.b,Y=kx?s.b:s.a;
+    const g=[...built].find(j=>dt(A.F[A.secSegs[j].f].n,A.F[s.f].n)<-.999);
+    if(g===undefined)return;const gs=A.secSegs[g];
+    A.plan.push({kind:'par',i,X,Y,f:s.f,g:gs.f,nx:nm(X),ny:nm(Y),ngx:nm(gs.a),ngy:nm(gs.b)});
+    known.add(KEY(Y));built.add(i);did=true;});
+   if(did)continue;}
+  A.secSegs.forEach((s,i)=>{if(built.has(i)||did)return;
+   const kx=known.has(KEY(s.a)),ky=known.has(KEY(s.b));if(!kx&&!ky)return;
+   const X=kx?s.a:s.b,Y=kx?s.b:s.a;if(known.has(KEY(Y)))return;
+   for(const e of edgesOfFace(s.f)){
+    const g=e.fs.find(j=>j!==s.f&&[...built].some(b=>A.secSegs[b].f===j));if(g===undefined)continue;
+    const bs=A.secSegs.find((q,qi)=>built.has(qi)&&q.f===g);if(!bs)continue;
+    const r=lineInt(bs.a,bs.b,pt(e.a).p,pt(e.b).p,EPS*A.size*8);if(!r||!fin3(r.p))continue;
+    if(ds(r.p,X)<EPS*A.size*6||ds(r.p,Y)<EPS*A.size*6)continue;
+    A.plan.push({kind:'trace',i,X,Y,T:r.p,nT:nm(r.p),nx:nm(X),ny:nm(Y),f:s.f,g,
+     traceN:nm(bs.a)+nm(bs.b),edge:eName(e),eIn:r.t2>-1e-3&&r.t2<1+1e-3,eY:eName(edgeAt(Y,s.f))});
+    known.add(KEY(Y));built.add(i);did=true;break;}});
+  if(!did)break;}
+ buildProof();}
+const emitPerpProof=Hn=>{const f=A.F[A.goal.face],M=pt(A.goal.M).name;
+ proofBlock('Доказательство',`${M}${Hn} ⟂ ${f.name}`,
+  `Вектор ${M}${Hn} коллинеарен нормали плоскости ${f.name}, значит он перпендикулярен двум пересекающимся прямым этой плоскости, и по признаку перпендикулярности прямой и плоскости ${M}${Hn} ⟂ ${f.name}. Длина ${M}${Hn} — искомое расстояние. ∎`,'ok');};
+function buildProof(){
+ A.proof=A.proof.filter(b=>b.tag==='Этап'||b.tag==='Фигура');
+ if(A.goal&&A.goal.type==='perp'){const f=A.F[A.goal.face],M=pt(A.goal.M).name;
+  proofBlock('Дано',`${A.figName}; точка ${M} ∉ ${f.name}`,'Требуется опустить перпендикуляр на плоскость и найти расстояние.','given');
+  proofBlock('Шаг 1','Перпендикуляр существует и единствен','Через точку, не лежащую в плоскости, проходит единственная прямая, перпендикулярная этой плоскости; её точка пересечения с плоскостью — основание H.');
+  proofBlock('Шаг 2','Проверка по признаку','Если прямая перпендикулярна двум пересекающимся прямым плоскости, то она перпендикулярна плоскости — берём две стороны грани, выходящие из H.');
+  return;}
+ if(!A.alpha)return;
+ proofBlock('Дано',A.figName,(A.given.map(g=>g.desc).join('; ')||'')+'. '+(A.alpha.kindTxt||'Требуется построить сечение плоскостью α.'),'given');
+ proofBlock('Шаг 1','Плоскость α определена однозначно',A.alpha.reason||'Через три точки, не лежащие на одной прямой, проходит плоскость, и притом только одна (A₁).');
+ A.plan.forEach((s,k)=>{const F=A.F[s.f].name;
+  if(s.kind==='connect')proofBlock('Шаг '+(k+2),`α ∩ ${F} = [${s.nx}${s.ny}]`,
+   `${s.nx},${s.ny} ∈ α и одновременно ${s.nx},${s.ny} ∈ ${F}. Если две точки прямой принадлежат плоскости, то и вся прямая принадлежит ей (A₂), значит ${s.nx}${s.ny} ⊂ α и ${s.nx}${s.ny} ⊂ ${F}. Плоскости различны, их пересечение — прямая (A₃), поэтому ${s.nx}${s.ny} = α ∩ ${F}.`);
+  if(s.kind==='par')proofBlock('Шаг '+(k+2),`α ∩ ${F} = [${s.nx}${s.ny}], ${s.nx}${s.ny} ∥ ${s.ngx}${s.ngy}`,
+   `Грани ${F} и ${A.F[s.g].name} лежат в параллельных плоскостях и обе пересечены α. Если две параллельные плоскости пересечены третьей, линии пересечения параллельны, поэтому след в ${F} параллелен ${s.ngx}${s.ngy}. Проводим через ${s.nx} прямую, параллельную ${s.ngx}${s.ngy}; её пересечение с ребром даёт ${s.ny}.`);
+  if(s.kind==='trace')proofBlock('Шаг '+(k+2),`${s.nT} = ${s.traceN} ∩ ${s.edge}; α ∩ ${F} = [${s.nx}${s.ny}]`,
+   `Прямые ${s.traceN} и ${s.edge} лежат в плоскости грани ${A.F[s.g].name}, поэтому пересекаются${s.eIn?'':' после продолжения'} в точке ${s.nT}. Так как ${s.nT} ∈ ${s.traceN} ⊂ α, то ${s.nT} ∈ α; так как ${s.nT} ∈ ${s.edge} ⊂ ${F}, то ${s.nT} ∈ ${F}. Значит ${s.nT} — общая точка α и ${F}; вместе с ${s.nx} по A₂ и A₃ получаем ${s.nx}${s.nT} = α ∩ ${F}, эта прямая пересекает ребро ${s.eY} в точке ${s.ny}.`);});
+ const verts=A.secPoly.map(p=>A.vname.get(KEY(p))||'·').join('');
+ const nm=['','','','треугольник','четырёхугольник','пятиугольник','шестиугольник','семиугольник','восьмиугольник'];
+ proofBlock('Вывод',`Сечение — ${nm[A.secPoly.length]||A.secPoly.length+'-угольник'} ${verts}`,
+  `Каждая сторона — линия пересечения α с гранью, каждая вершина — точка пересечения α с ребром. Других общих точек α с поверхностью выпуклого тела нет, поэтому ${verts} — искомое сечение. ∎`,'ok');}
+
+/*=========== 6. ГЕНЕРАТОР ===========*/
+const NICE=[1/2,1/3,2/3,1/4,3/4,2/5,3/5];
+const facePairs=ps=>{let c=0;for(let i=0;i<3;i++)for(let j=i+1;j<3;j++)
+ if(A.F.some(f=>visF(f)&&Math.abs(dt(f.n,ps[i])-f.d)<EPS*A.size*4&&Math.abs(dt(f.n,ps[j])-f.d)<EPS*A.size*4))c++;return c;};
+function genTask(method,level,figKey,seed){
+ A.method=method==='any'?pick(['trace','parallel','perp']):method;
+ A.seed=seed||Math.floor(Math.random()*1e9);srand(A.seed);
+ const lv=+level,figs=figKey&&figKey!=='auto'?[figKey]:(A.method==='parallel'?PRISMS:ALLF);
+ for(let tf=0;tf<40;tf++){
+  const fk=pick(figs);makeFigure(REC[fk]);finishStages();
+  if(A.method==='perp'){if(makePerpTask(lv))return true;continue;}
+  const edges=A.Ln.filter(l=>l.kind==='edge');
+  for(let t=0;t<260;t++){
+   const idx=[];while(idx.length<3){const i=Math.floor(rnd01()*edges.length);if(!idx.includes(i))idx.push(i);}
+   const spec=idx.map(i=>({e:edges[i],t:NICE[Math.floor(rnd01()*NICE.length)]}));
+   const ps=spec.map(s=>lp(pt(s.e.a).p,pt(s.e.b).p,s.t));
+   if(L(cr(sb(ps[1],ps[0]),sb(ps[2],ps[0])))<.15)continue;
+   const n=nz(cr(sb(ps[1],ps[0]),sb(ps[2],ps[0])));A.alpha={n,d:dt(n,ps[0])};computeSection();
+   if(!secOK())continue;
+   const cls=facePairs(ps),need=lv===0?2:(lv===1?1:0);
+   if(lv===2?cls>0:(cls!==need&&!(lv===0&&cls>=2)))continue;
+   if(A.method==='parallel'&&!A.secSegs.some((s,i)=>A.secSegs.some((q,j)=>j>i&&dt(A.F[s.f].n,A.F[q.f].n)<-.999)))continue;
+   const names=['M','N','P'];
+   A.given=spec.map((s,i)=>{const o=addPoint(ps[i],names[i],'task');
+    return{id:o.id,name:names[i],desc:`${names[i]} ∈ ${pt(s.e.a).name}${pt(s.e.b).name}`};});
+   A.alpha.names=names;
+   A.alpha.reason='Точки M, N, P не лежат на одной прямой ⇒ через них проходит единственная плоскость α (A₁).';
+   A.alpha.kindTxt='Требуется построить сечение тела плоскостью (MNP).';
+   A.goal=null;
+   A.taskText=`Построй сечение тела «${REC[fk].t}» плоскостью, проходящей через точки M, N, P.`+
+    (A.method==='parallel'?' Подсказка: следы в параллельных гранях параллельны.':'');
+   computeSection();buildPlan();A.taskNo++;A.free=false;A.done=false;
+   log('Новое задание: '+REC[fk].t,A.taskText,'ok');fitCam(cam,W,H);uiDirty=dirty=true;return true;}}
+ say('Не удалось подобрать задание — смени параметры.');return false;}
+function makePerpTask(lv){
+ const verts=A.P.filter(p=>p.kind==='vertex');
+ if(lv<2){for(let t=0;t<140;t++){
+   const M=pick(verts),fi=Math.floor(rnd01()*A.F.length),f=A.F[fi];
+   if(f.v.includes(M.id))continue;
+   const h=dt(f.n,M.p)-f.d;if(Math.abs(h)<.3*A.size/2)continue;
+   const H=sb(M.p,ml(f.n,h));
+   const inside=f.v.every((id,i)=>dt(cr(f.n,sb(pt(f.v[(i+1)%f.v.length]).p,pt(id).p)),sb(H,pt(id).p))<=EPS*A.size);
+   if(lv===0&&!inside)continue;
+   A.alpha=null;A.goal={type:'perp',M:M.id,face:fi,H};
+   A.given=[{name:M.name,desc:`${M.name} ∉ ${f.name}`}];
+   A.taskText=`Опусти перпендикуляр из точки ${M.name} на плоскость ${f.name} и найди расстояние от ${M.name} до этой плоскости.`;
+   A.plan=[{kind:'perp'}];A.planI=0;buildProof();A.taskNo++;A.free=false;A.done=false;
+   log('Новое задание: перпендикуляр',A.taskText,'ok');fitCam(cam,W,H);uiDirty=dirty=true;return true;}
+  return false;}
+ const edges=A.Ln.filter(l=>l.kind==='edge');
+ for(let t=0;t<200;t++){const e=pick(edges),e2=pick(edges);if(e===e2)continue;
+  const M=lp(pt(e2.a).p,pt(e2.b).p,pick(NICE)),n=nz(sb(pt(e.b).p,pt(e.a).p));
+  A.alpha={n,d:dt(n,M)};computeSection();if(!secOK())continue;
+  addPoint(M,'M','task');A.given=[{name:'M',desc:`M ∈ ${pt(e2.a).name}${pt(e2.b).name}`}];
+  A.alpha.names=['M'];
+  A.alpha.reason=`Через данную точку проходит единственная плоскость, перпендикулярная прямой ${pt(e.a).name}${pt(e.b).name}.`;
+  A.alpha.kindTxt=`Требуется построить сечение плоскостью через M перпендикулярно ${pt(e.a).name}${pt(e.b).name}.`;
+  A.goal=null;A.taskText=`Построй сечение через точку M перпендикулярно прямой ${pt(e.a).name}${pt(e.b).name}.`;
+  buildPlan();A.taskNo++;A.free=false;A.done=false;fitCam(cam,W,H);uiDirty=dirty=true;return true;}
+ return false;}
+
+/*=========== 7. АВТОШАГ, ПОДСКАЗКА ===========*/
+function autoStep(){
+ if(A.goal&&A.goal.type==='perp'){const f=A.F[A.goal.face],M=pt(A.goal.M);
+  snap();const H=addPoint(A.goal.H);A.Ln.push({id:++uid,a:M.id,b:H.id,kind:'perp',ext:false,st:A.maxStage,fs:[]});
+  A.acts++;A.good++;log(`Опущен перпендикуляр ${M.name}${H.name}`,`${H.name} ∈ ${f.name}, ${M.name}${H.name} ⟂ ${f.name}.`,'ok');
+  checkDone();dirty=uiDirty=true;return;}
+ if(!A.plan.length)return say('План пуст: задай плоскость α.');
+ if(A.planI>=A.plan.length)return say('Все шаги выполнены.');
+ const s=A.plan[A.planI++];snap();
+ const X=addPoint(s.X,s.nx),Y=addPoint(s.Y,s.ny);
+ if(s.kind==='trace'){addPoint(s.T,s.nT);
+  const bs=A.secSegs.find(q=>q.f===s.g);
+  if(bs){const p1=addPoint(bs.a),p2=addPoint(bs.b);
+   let l=A.Ln.find(l=>(l.a===p1.id&&l.b===p2.id)||(l.a===p2.id&&l.b===p1.id));
+   if(!l)A.Ln.push({id:++uid,a:p1.id,b:p2.id,kind:'sec',ext:true,st:A.maxStage,fs:[]});else l.ext=true;}
+  log(`Найден след ${s.nT}`,`${s.nT} = ${s.traceN} ∩ ${s.edge}; обе прямые лежат в плоскости ${A.F[s.g].name}.`,'ok');}
+ if(!A.Ln.some(l=>(l.a===X.id&&l.b===Y.id)||(l.a===Y.id&&l.b===X.id)))
+  A.Ln.push({id:++uid,a:X.id,b:Y.id,kind:'sec',ext:false,st:A.maxStage,fs:[]});
+ A.acts++;A.good++;
+ log(`Сторона ${s.nx}${s.ny} в грани ${A.F[s.f].name}`,
+  s.kind==='par'?`Построена параллельно следу ${s.ngx}${s.ngy}.`:`${s.nx},${s.ny} ∈ α ∩ ${A.F[s.f].name}.`,'ok');
+ computeSection();dirty=uiDirty=true;say(`Шаг ${A.planI} из ${A.plan.length}`);}
+function hint(){
+ if(!A.hintOn)return'Подсказки скрыты. Нажми 👁.';
+ if(A.stage<A.maxStage)return'Сначала достройте фигуру («▶ Этап»).';
+ if(A.done)return'Готово! Смотри доказательство и «Измерения».';
+ if(A.goal&&A.goal.type==='perp'){const f=A.F[A.goal.face],M=pt(A.goal.M).name;
+  return A.level===0?`Возьми «Перпендикуляр», нажми точку ${M}, затем грань ${f.name}.`
+   :A.level===1?'Из данной точки нужно опустить перпендикуляр на плоскость.'
+   :'Вспомни признак перпендикулярности прямой и плоскости.';}
+ if(!A.alpha)return'Плоскость α не задана: инструментом «Плоскость α» выбери три точки.';
+ const st=A.plan.find(p=>!covered(A.secSegs[p.i].a,A.secSegs[p.i].b));
+ if(!st)return'Почти готово — соедини оставшиеся точки.';
+ const F=A.F[st.f].name;
+ if(A.level===2)return'Подумай: в какой грани уже известны две точки секущей плоскости?';
+ if(A.level===1){if(st.kind==='connect')return'В одной из граней уже известны две точки плоскости сечения. Соедини их.';
+  if(st.kind==='par')return'Эта грань параллельна той, где след уже есть. Что можно сказать о следах?';
+  return'С каким ребром из этой же плоскости пересечётся построенная линия? Продли его.';}
+ if(st.kind==='connect')return`Точки ${st.nx} и ${st.ny} лежат в грани ${F}. Соедини их (A₂).`;
+ if(st.kind==='par')return`Грань ${F} ∥ ${A.F[st.g].name}. Через ${st.nx} проведи прямую ∥ ${st.ngx}${st.ngy}.`;
+ return`Продли след ${st.traceN} и прямую ${st.edge} — получишь ${st.nT}. Затем ${st.nx}${st.nT} пересечёт ребро ${st.eY} в точке ${st.ny}.`;}
+
+/*=========== 8. РЕНДЕР ===========*/
+const cv=document.getElementById('cv'),mcv=document.getElementById('mcv');
+let cx=null,mx=null,W=0,H=0,MW=218,MH=164,PJ=new Map();
+function sizeCanvas(c,w,h){const d=cl(devicePixelRatio||1,1,2.5);
+ const bw=Math.max(1,Math.round(w*d)),bh=Math.max(1,Math.round(h*d));
+ if(c.width!==bw||c.height!==bh){c.width=bw;c.height=bh;}
+ c.style.width=w+'px';c.style.height=h+'px';
+ const g=c.getContext('2d');g.setTransform(d,0,0,d,0,0);return g;}
+const basis=c=>{const f=[Math.cos(c.el)*Math.cos(c.az),Math.cos(c.el)*Math.sin(c.az),Math.sin(c.el)];
+ return{f,r:[-Math.sin(c.az),Math.cos(c.az),0],u:cr(f,[-Math.sin(c.az),Math.cos(c.az),0])};};
+function makeProj(c,w,h){const B=basis(c),C=A.center,D=A.size*2.4,eye=ad(C,ml(B.f,D)),per=CFG.proj==='persp';
+ return{eye,B,fn:p=>{const v=sb(p,C),z=dt(v,B.f),k=per?D/Math.max(.3,D-z):1;
+  return{x:w/2+c.px+c.sc*k*dt(v,B.r),y:h/2+c.py-c.sc*k*dt(v,B.u),z};}};}
+function fitCam(c,w,h,pad){if(!w||!h||!A.P.length)return;pad=pad||(MOB?26:34);
+ c.px=0;c.py=0;c.sc=100;let pr=makeProj(c,w,h);
+ let P=A.P.filter(visP).map(p=>pr.fn(p.p)).filter(s=>Number.isFinite(s.x)&&Number.isFinite(s.y));
+ if(P.length<2)return;
+ const bw=Math.max(...P.map(p=>p.x))-Math.min(...P.map(p=>p.x));
+ const bh=Math.max(...P.map(p=>p.y))-Math.min(...P.map(p=>p.y));
+ c.sc=cl(c.sc*Math.min((w-2*pad)/Math.max(bw,1),(h-2*pad)/Math.max(bh,1)),4,2000);
+ pr=makeProj(c,w,h);P=A.P.filter(visP).map(p=>pr.fn(p.p));
+ c.px+=w/2-(Math.max(...P.map(p=>p.x))+Math.min(...P.map(p=>p.x)))/2;
+ c.py+=h/2-(Math.max(...P.map(p=>p.y))+Math.min(...P.map(p=>p.y)))/2;dirty=true;}
+const front=(f,pr)=>dt(f.n,sb(pr.eye,f.c))>0;
+function shade(hex,f,pr){if(!CFG.light)return hex;
+ const Lv=nz(ad(pr.B.f,[.35,.5,.9])),k=.6+.4*Math.abs(dt(f.n,Lv)),c=hex.replace('#','');
+ const r=parseInt(c.slice(0,2),16),g=parseInt(c.slice(2,4),16),b=parseInt(c.slice(4,6),16);
+ return`rgb(${Math.min(255,r*k|0)},${Math.min(255,g*k|0)},${Math.min(255,b*k|0)})`;}
+function drawMain(){const g=cx,c=cam,w=W,h=H;if(!g||w<2||h<2||!A.P.length)return;
+ const pr=makeProj(c,w,h),th=CFG.theme;
+ g.save();g.beginPath();g.rect(0,0,w,h);g.clip();
+ const gr=g.createRadialGradient(w/2,h*.42,10,w/2,h*.42,Math.max(w,h)*.75);
+ gr.addColorStop(0,th==='light'?'#fff':(th==='dark'?'#232839':'#182a55'));
+ gr.addColorStop(1,th==='light'?'#eff1f8':(th==='dark'?'#14171f':'#0d1a38'));
+ g.fillStyle=gr;g.fillRect(0,0,w,h);
+ const zmin=Math.min(...A.P.filter(visP).map(p=>p.p[2]))-.001;
+ if(CFG.grid){g.strokeStyle=th==='light'?'#e9ecf6':'#262c3c';g.lineWidth=1;
+  for(let i=-5;i<=5;i++){let a=pr.fn([i*.6,-3,zmin]),b=pr.fn([i*.6,3,zmin]);
+   g.globalAlpha=1-Math.abs(i)/7;g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke();
+   a=pr.fn([-3,i*.6,zmin]);b=pr.fn([3,i*.6,zmin]);g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke();}
+  g.globalAlpha=1;}
+ if(CFG.shadow){const S=A.P.filter(visP).map(p=>pr.fn([p.p[0],p.p[1],zmin])).filter(s=>Number.isFinite(s.x));
+  if(S.length>2){const hl=hull2(S);g.beginPath();hl.forEach((s,i)=>i?g.lineTo(s.x,s.y):g.moveTo(s.x,s.y));g.closePath();
+   g.fillStyle='rgba(30,40,80,.10)';g.filter='blur(6px)';g.fill();g.filter='none';}}
+ if(CFG.axes){const O=pr.fn([0,0,0]);
+  [[[1.7,0,0],'#e05555','x'],[[0,1.7,0],'#39b36a','y'],[[0,0,1.7],'#4b7bec','z']].forEach(([v,col,n])=>{
+   const p=pr.fn(v);g.strokeStyle=col;g.lineWidth=1.4;g.beginPath();g.moveTo(O.x,O.y);g.lineTo(p.x,p.y);g.stroke();
+   g.fillStyle=col;g.font='11px Arial';g.fillText(n,p.x+3,p.y-3);});}
+ const solid=CFG.style==='solid',wire=CFG.style==='wire';
+ const fs=A.F.filter(visF).map(f=>({f,d:dt(sb(f.c,pr.eye),pr.B.f),fr:front(f,pr)})).sort((a,b)=>b.d-a.d);
+ const paint=o=>{if(wire)return;const P=o.f.v.map(id=>pr.fn(pt(id).p));
+  if(P.some(s=>!Number.isFinite(s.x)))return;
+  g.beginPath();P.forEach((s,i)=>i?g.lineTo(s.x,s.y):g.moveTo(s.x,s.y));g.closePath();
+  g.fillStyle=shade(th==='light'?'#8e97d8':'#5967bd',o.f,pr);
+  g.globalAlpha=solid?1:(o.fr?CFG.faceOp:CFG.faceOp*.5);g.fill();g.globalAlpha=1;};
+ if(!solid)fs.filter(o=>!o.fr).forEach(paint);
+ const seg=(a,b,col,wd,dash,ext,glow)=>{const p=pr.fn(a),q=pr.fn(b);
+  if(!Number.isFinite(p.x)||!Number.isFinite(q.x))return;
+  if(ext){const dx=q.x-p.x,dy=q.y-p.y,l=Math.hypot(dx,dy)||1,K=Math.max(w,h)*2;
+   g.beginPath();g.moveTo(p.x-dx/l*K,p.y-dy/l*K);g.lineTo(q.x+dx/l*K,q.y+dy/l*K);
+   g.setLineDash([]);g.lineWidth=1;g.strokeStyle=CFG.auxCol;g.globalAlpha=.6;g.stroke();g.globalAlpha=1;}
+  g.beginPath();g.moveTo(p.x,p.y);g.lineTo(q.x,q.y);g.lineCap='round';
+  g.setLineDash(dash?[6,5]:[]);g.lineWidth=wd;g.strokeStyle=col;
+  if(glow&&CFG.glow){g.shadowColor=col;g.shadowBlur=10;}g.stroke();g.shadowBlur=0;g.setLineDash([]);};
+ const lvis=l=>{if(l.kind==='edge')return l.fs.some(i=>visF(A.F[i])&&front(A.F[i],pr));
+  const fi=A.F.findIndex(f=>visF(f)&&Math.abs(dt(f.n,pt(l.a).p)-f.d)<EPS*A.size*4&&Math.abs(dt(f.n,pt(l.b).p)-f.d)<EPS*A.size*4);
+  return fi<0||front(A.F[fi],pr);};
+ const lines=A.Ln.filter(visL);
+ lines.forEach(l=>{if(lvis(l)||CFG.hidden==='none'||solid)return;
+  g.globalAlpha=CFG.hidden==='fade'?.25:.75;
+  seg(pt(l.a).p,pt(l.b).p,l.kind==='edge'?CFG.edgeCol:(l.kind==='aux'?CFG.auxCol:CFG.secCol),
+   l.kind==='edge'?CFG.edgeW:CFG.edgeW*1.15,CFG.hidden==='dash',l.ext);g.globalAlpha=1;});
+ if((A.done||A.ans)&&secOK()){const P=A.secPoly.map(pr.fn);
+  if(P.every(s=>Number.isFinite(s.x))){
+   g.beginPath();P.forEach((s,i)=>i?g.lineTo(s.x,s.y):g.moveTo(s.x,s.y));g.closePath();
+   g.fillStyle=CFG.secCol;g.globalAlpha=CFG.secOp;g.fill();g.globalAlpha=1;
+   g.strokeStyle=CFG.secCol;g.lineWidth=2.4;
+   if(CFG.glow){g.shadowColor=CFG.secCol;g.shadowBlur=14;}g.stroke();g.shadowBlur=0;}}
+ if(!solid)fs.filter(o=>o.fr).forEach(paint);else fs.forEach(paint);
+ lines.forEach(l=>{if(!lvis(l))return;
+  const sel=A.sel.some(s=>s.t==='l'&&s.id===l.id),hv=hover&&hover.t==='l'&&hover.id===l.id;
+  const col=sel?'#6c5ce7':(hv?'#8b83f0':(l.kind==='edge'?CFG.edgeCol:(l.kind==='aux'?CFG.auxCol:CFG.secCol)));
+  seg(pt(l.a).p,pt(l.b).p,col,sel?CFG.edgeW+2:(l.kind==='edge'?CFG.edgeW:CFG.edgeW*1.25),l.kind==='perp',l.ext,l.kind==='sec');
+  if(l.kind==='perp'){const a=pr.fn(pt(l.a).p),b=pr.fn(pt(l.b).p),len=Math.hypot(a.x-b.x,a.y-b.y)||1;
+   const dx=(a.x-b.x)/len*11,dy=(a.y-b.y)/len*11;
+   g.strokeStyle=col;g.lineWidth=1.3;g.beginPath();g.moveTo(b.x+dx,b.y+dy);
+   g.lineTo(b.x+dx-dy*.9,b.y+dy+dx*.9);g.lineTo(b.x-dy*.9,b.y+dx*.9);g.stroke();}});
+ PJ=new Map();
+ A.P.filter(visP).forEach(p=>{const s=pr.fn(p.p);if(!Number.isFinite(s.x))return;PJ.set(p.id,s);
+  const V=p.kind==='vertex',r=V?(MOB?4:3.6):CFG.ptR*(MOB?1.2:1);
+  const sel=A.sel.some(x=>x.t==='p'&&x.id===p.id),hv=hover&&hover.t==='p'&&hover.id===p.id;
+  if(!V){g.beginPath();g.arc(s.x,s.y,r+2.5,0,7);g.fillStyle=th==='light'?'#fff':'#1b1e29';g.fill();}
+  g.beginPath();g.arc(s.x,s.y,r+(hv?1.5:0),0,7);
+  g.fillStyle=V?(th==='light'?CFG.edgeCol:'#ccd3f6'):(p.kind==='task'?CFG.ptCol:'#d05aa8');g.fill();
+  if(sel){g.beginPath();g.arc(s.x,s.y,r+7+Math.sin(tNow/220)*1.5,0,7);g.strokeStyle='#6c5ce7';g.lineWidth=2;g.stroke();}
+  if(CFG.labels){const C=pr.fn(A.center),dx=s.x-C.x,dy=s.y-C.y,l=Math.hypot(dx,dy)||1;
+   const tx=s.x+dx/l*14-4,ty=s.y+dy/l*14+5;g.font=`600 ${CFG.fs}px ui-sans-serif,Arial`;
+   g.lineWidth=3.5;g.strokeStyle=th==='light'?'#fff':'#1b1e29';g.strokeText(p.name,tx,ty);
+   g.fillStyle=V?(th==='light'?'#2b2f66':'#dde3ff'):CFG.ptCol;g.fillText(p.name,tx,ty);}});
+ g.restore();}
+function drawMini(){if(!CFG.mini||!A.P.length)return;
+ MW=MOB?156:218;MH=Math.round(MW*.75);
+ mx=sizeCanvas(mcv,MW,MH);const g=mx,w=MW,h=MH;
+ g.save();g.beginPath();g.rect(0,0,w,h);g.clip();g.clearRect(0,0,w,h);
+ g.fillStyle=CFG.theme==='light'?'#f6f7fc':'#141826';g.fillRect(0,0,w,h);
+ const c=mcam,v=document.getElementById('mini-v').value;
+ if(v==='top'){c.az=cam.az;c.el=1.4;}else if(v==='front'){c.az=cam.az;c.el=.06;}
+ else if(v==='sec'&&A.alpha&&fin3(A.alpha.n)){const n=A.alpha.n;c.az=Math.atan2(n[1],n[0]);c.el=Math.asin(cl(n[2],-1,1));}
+ fitCam(c,w,h,14);
+ if(!Number.isFinite(c.sc)||c.sc<=0){g.restore();return;}
+ const pr=makeProj(c,w,h);
+ const S=p=>{const s=pr.fn(p);return(Number.isFinite(s.x)&&Number.isFinite(s.y)&&Math.abs(s.x)<9e3&&Math.abs(s.y)<9e3)?s:null;};
+ A.F.filter(visF).map(f=>({f,d:dt(sb(f.c,pr.eye),pr.B.f),fr:front(f,pr)})).sort((a,b)=>b.d-a.d)
+  .forEach(o=>{const P=o.f.v.map(id=>S(pt(id).p));if(P.some(x=>!x))return;
+   g.beginPath();P.forEach((s,i)=>i?g.lineTo(s.x,s.y):g.moveTo(s.x,s.y));g.closePath();
+   g.fillStyle=CFG.theme==='light'?'#9aa3dd':'#4d5aa6';g.globalAlpha=o.fr?.16:.07;g.fill();g.globalAlpha=1;});
+ A.Ln.filter(visL).forEach(l=>{const p=S(pt(l.a).p),q=S(pt(l.b).p);if(!p||!q)return;
+  const vis=l.kind==='edge'?l.fs.some(i=>visF(A.F[i])&&front(A.F[i],pr)):true;
+  g.beginPath();g.moveTo(p.x,p.y);g.lineTo(q.x,q.y);
+  g.setLineDash(vis?[]:[4,4]);g.lineWidth=l.kind==='edge'?1.25:1.7;g.globalAlpha=vis?1:.4;
+  g.strokeStyle=l.kind==='edge'?CFG.edgeCol:(l.kind==='aux'?CFG.auxCol:CFG.secCol);
+  g.stroke();g.globalAlpha=1;g.setLineDash([]);});
+ if(secOK()){const P=A.secPoly.map(S);
+  if(!P.some(x=>!x)){g.beginPath();P.forEach((s,i)=>i?g.lineTo(s.x,s.y):g.moveTo(s.x,s.y));g.closePath();
+   g.fillStyle=CFG.secCol;g.globalAlpha=.3;g.fill();g.globalAlpha=1;
+   g.strokeStyle=CFG.secCol;g.lineWidth=1.7;g.stroke();
+   P.forEach(s=>{g.beginPath();g.arc(s.x,s.y,2.4,0,7);g.fillStyle=CFG.secCol;g.fill();});}}
+ A.P.filter(p=>visP(p)&&p.kind==='task').forEach(p=>{const s=S(p.p);if(!s)return;
+  g.beginPath();g.arc(s.x,s.y,2.8,0,7);g.fillStyle=CFG.ptCol;g.fill();});
+ g.restore();}
+function resize(){const m=cv.parentElement.getBoundingClientRect();
+ const footH=document.getElementById('foot').offsetHeight&&!MOB?26:0;
+ W=Math.max(2,m.width);H=Math.max(2,m.height-footH);cx=sizeCanvas(cv,W,H);dirty=true;}
+function loop(ts){tNow=ts||0;
+ if(camT){const k=.16;cam.az+=(camT.az-cam.az)*k;cam.el+=(camT.el-cam.el)*k;
+  if(Math.abs(camT.az-cam.az)<1e-3&&Math.abs(camT.el-cam.el)<1e-3)camT=null;dirty=true;}
+ if(CFG.rot){cam.az+=.004;dirty=true;}
+ if(dirty){drawMain();dirty=false;}
+ if(CFG.mini){if(document.getElementById('mini-v').value==='free')mcam.az+=.005;drawMini();}
+ if(uiDirty){ui();uiDirty=false;}
+ requestAnimationFrame(loop);}
+
+/*=========== 9. ВВОД ===========*/
+const snap=()=>{A.hist.push(JSON.stringify({P:A.P,L:A.Ln,u:uid,a:A.acts,g:A.good,lg:A.log}));
+ if(A.hist.length>90)A.hist.shift();A.fut=[];};
+const restore=s=>{A.P=s.P;A.Ln=s.L;uid=s.u;A.acts=s.a;A.good=s.g;A.log=s.lg;A.sel=[];A.done=false;computeSection();dirty=uiDirty=true;};
+const undo=()=>{if(!A.hist.length)return;A.fut.push(JSON.stringify({P:A.P,L:A.Ln,u:uid,a:A.acts,g:A.good,lg:A.log}));restore(JSON.parse(A.hist.pop()));};
+const redo=()=>{if(!A.fut.length)return;A.hist.push(JSON.stringify({P:A.P,L:A.Ln,u:uid,a:A.acts,g:A.good,lg:A.log}));restore(JSON.parse(A.fut.pop()));};
+let msgT;function say(t){const m=document.getElementById('msg');m.textContent=t;m.style.opacity=1;
+ clearTimeout(msgT);msgT=setTimeout(()=>m.style.opacity=0,3600);}
+const RP=()=>MOB?28:14, RL=()=>MOB?18:9;
+function pickP(x,y){let b=null,d0=RP();PJ.forEach((s,id)=>{const d=Math.hypot(s.x-x,s.y-y);if(d<d0){d0=d;b=pt(id);}});return b;}
+function pickL(x,y){let b=null,d0=RL();A.Ln.filter(visL).forEach(l=>{const p=PJ.get(l.a),q=PJ.get(l.b);if(!p||!q)return;
+ const dx=q.x-p.x,dy=q.y-p.y,l2=dx*dx+dy*dy||1;let t=((x-p.x)*dx+(y-p.y)*dy)/l2;if(!l.ext)t=cl(t,0,1);
+ const d=Math.hypot(p.x+dx*t-x,p.y+dy*t-y);if(d<d0){d0=d;b={l,t};}});return b;}
+function pickF(x,y){const pr=makeProj(cam,W,H);
+ const fs=A.F.filter(f=>visF(f)&&front(f,pr)).map(f=>({f,d:dt(sb(f.c,pr.eye),pr.B.f)})).sort((a,b)=>a.d-b.d);
+ for(const o of fs){const P=o.f.v.map(id=>PJ.get(id));if(P.some(p=>!p))continue;let ins=false;
+  for(let i=0,j=P.length-1;i<P.length;j=i++)
+   if((P[i].y>y)!==(P[j].y>y)&&x<(P[j].x-P[i].x)*(y-P[i].y)/(P[j].y-P[i].y)+P[i].x)ins=!ins;
+  if(ins)return A.F.indexOf(o.f);}return -1;}
+const dirOf=l=>sb(pt(l.b).p,pt(l.a).p);
+const planesOfP=p=>{const r=A.F.filter(f=>visF(f)&&Math.abs(dt(f.n,p)-f.d)<EPS*A.size*4).map(f=>f.name);
+ if(onAlpha(p))r.unshift('α');return r;};
+const planesOfL=l=>{const a=planesOfP(pt(l.a).p),b=planesOfP(pt(l.b).p);return a.filter(x=>b.includes(x));};
+const score=ok=>{A.acts++;if(ok)A.good++;};
+const TOOLS=[['line','1 · Прямая через 2 точки'],['inter','2 · Пересечение прямых'],['ext','3 · Продлить прямую'],
+ ['point','4 · Точка на прямой / грани'],['mid','5 · Середина отрезка'],['par','6 · Параллельная прямая'],
+ ['lp','7 · Прямая ∩ грань'],['perp','8 · Перпендикуляр к грани'],['alpha','9 · Задать плоскость α'],
+ ['del','0 · Удалить'],['view','· Обзор']];
+const setTool=t=>{A.tool=t;A.sel=[];dirty=uiDirty=true;};
+function click(x,y,long){
+ if(A.stage<A.maxStage&&A.tool!=='view')return say('Сначала достройте фигуру.');
+ const T=A.tool;if(T==='view')return;
+ if(T==='line'||T==='mid'||T==='alpha'){
+  const p=pickP(x,y);if(!p)return say('Нажми на точку.');
+  const i=A.sel.findIndex(s=>s.t==='p'&&s.id===p.id);if(i>=0){A.sel.splice(i,1);dirty=true;return;}
+  A.sel.push({t:'p',id:p.id});dirty=true;
+  if(T==='line'&&A.sel.length===2){const a=A.sel[0].id,b=A.sel[1].id;A.sel=[];
+   if(A.Ln.some(l=>(l.a===a&&l.b===b)||(l.a===b&&l.b===a)))return say('Такая прямая уже есть.');
+   snap();const com=planesOfL({a,b}),F=com.find(z=>z!=='α');
+   A.Ln.push({id:++uid,a,b,kind:F?'sec':'aux',ext:false,st:A.maxStage,fs:[]});
+   const na=pt(a).name,nb=pt(b).name;score(!!F&&com.includes('α'));
+   log(F?`${na}${nb} = α ∩ ${F}`:`Вспомогательная прямая ${na}${nb}`,
+    F?`${na},${nb} ∈ ${F} и ∈ α ⇒ по A₂ прямая лежит в обеих плоскостях, по A₃ она и есть линия их пересечения.`
+     :'Точки не лежат в одной грани — прямая пригодится для поиска следов.',F?'ok':'warn');
+   computeSection();say(F?`${na}${nb} ⊂ ${F} — сторона сечения.`:'Вспомогательная прямая.');}
+  if(T==='mid'&&A.sel.length===2){const a=pt(A.sel[0].id),b=pt(A.sel[1].id);A.sel=[];snap();
+   const o=addPoint(ml(ad(a.p,b.p),.5));score(onAlpha(o.p));
+   log(`${o.name} — середина ${a.name}${b.name}`,`${a.name}${o.name}=${o.name}${b.name}.`);
+   computeSection();say('Середина: '+o.name);}
+  if(T==='alpha'&&A.sel.length===3){const P3=A.sel.map(s=>pt(s.id));A.sel=[];
+   if(L(cr(sb(P3[1].p,P3[0].p),sb(P3[2].p,P3[0].p)))<1e-7)return say('Точки на одной прямой.');
+   const n=nz(cr(sb(P3[1].p,P3[0].p),sb(P3[2].p,P3[0].p)));
+   A.alpha={n,d:dt(n,P3[0].p),names:P3.map(p=>p.name),
+    reason:'Через три точки, не лежащие на одной прямой, проходит единственная плоскость (A₁).'};
+   A.goal=null;A.given=P3.map(p=>({name:p.name,desc:p.name+' задана'}));
+   computeSection();buildPlan();say('Плоскость α: ('+A.alpha.names.join('')+')');}
+  return;}
+ if(T==='inter'||T==='par'||T==='lp'){
+  if(T==='lp'&&A.sel.length===1){const fi=pickF(x,y);if(fi<0)return say('Нажми на грань.');
+   const l=A.Ln.find(q=>q.id===A.sel[0].id);A.sel=[];const f=A.F[fi],d=dirOf(l),den=dt(f.n,d);
+   if(Math.abs(den)<1e-9)return say('Прямая параллельна плоскости грани.');
+   const t=(f.d-dt(f.n,pt(l.a).p))/den;if(!l.ext&&(t<-1e-6||t>1+1e-6))return say('Точка вне отрезка — продли прямую.');
+   snap();const o=addPoint(ad(pt(l.a).p,ml(d,t)));score(onAlpha(o.p));
+   log(`${o.name} = ${pt(l.a).name}${pt(l.b).name} ∩ ${f.name}`,'Прямая, не параллельная плоскости, пересекает её в одной точке.');
+   computeSection();return say('Точка: '+o.name);}
+  const h=pickL(x,y);if(!h)return say('Нажми на прямую.');
+  const i=A.sel.findIndex(s=>s.t==='l'&&s.id===h.l.id);if(i>=0){A.sel.splice(i,1);dirty=true;return;}
+  A.sel.push({t:'l',id:h.l.id});dirty=true;
+  if(T==='inter'&&A.sel.length===2){const l1=A.Ln.find(l=>l.id===A.sel[0].id),l2=A.Ln.find(l=>l.id===A.sel[1].id);A.sel=[];
+   const r=lineInt(pt(l1.a).p,pt(l1.b).p,pt(l2.a).p,pt(l2.b).p,EPS*A.size*8);
+   if(!r)return say('Прямые параллельны или скрещиваются.');
+   const lim=(l,t)=>l.ext||(t>-1e-6&&t<1+1e-6);
+   if(!lim(l1,r.t1)||!lim(l2,r.t2))return say('Точка вне отрезков — продли прямые.');
+   snap();const o=addPoint(r.p);score(onAlpha(o.p));
+   const n1=pt(l1.a).name+pt(l1.b).name,n2=pt(l2.a).name+pt(l2.b).name;
+   log(`${o.name} = ${n1} ∩ ${n2}`,
+    `${n1} ⊂ ${planesOfL(l1).join(' ∩ ')||'пространству'}, ${n2} ⊂ ${planesOfL(l2).join(' ∩ ')||'пространству'} ⇒ ${o.name} принадлежит обеим плоскостям (A₃).`,
+    onAlpha(o.p)?'ok':'warn');
+   computeSection();return say('Точка: '+o.name);}
+  if(T==='par'&&A.sel.length===1)say('Теперь нажми точку, через которую вести параллельную.');
+  return;}
+ if(T==='ext'){const h=pickL(x,y);if(!h)return say('Нажми на прямую.');snap();h.l.ext=!h.l.ext;score(true);
+  if(h.l.ext)log(`Продлеваем ${pt(h.l.a).name}${pt(h.l.b).name}`,'Прямая бесконечна; продолжение нужно для поиска следа.');
+  dirty=uiDirty=true;return say(h.l.ext?'Прямая продлена.':'Продление снято.');}
+ if(T==='perp'){
+  if(A.sel.length===0){const p=pickP(x,y);if(!p)return say('Нажми на точку.');
+   A.sel.push({t:'p',id:p.id});dirty=true;return say('Теперь нажми на грань.');}
+  const fi=pickF(x,y);if(fi<0)return say('Нажми на грань.');
+  const M=pt(A.sel[0].id);A.sel=[];const f=A.F[fi],h=dt(f.n,M.p)-f.d;
+  if(Math.abs(h)<1e-6)return say('Точка лежит в этой плоскости.');
+  snap();const Ho=addPoint(sb(M.p,ml(f.n,h)));
+  A.Ln.push({id:++uid,a:M.id,b:Ho.id,kind:'perp',ext:false,st:A.maxStage,fs:[]});score(true);
+  log(`${M.name}${Ho.name} ⟂ ${f.name}`,`${Ho.name} — основание перпендикуляра, |${M.name}${Ho.name}| = ${rnd(Math.abs(h),3)}.`,'ok');
+  computeSection();return say(`Расстояние ${rnd(Math.abs(h),3)}`);}
+ if(T==='point'){const h=pickL(x,y);
+  if(h){snap();let t=h.t;
+   if(long){const s=prompt('Отношение m:n от точки '+pt(h.l.a).name,'1:2');
+    if(s){const[m,n2]=s.split(':').map(Number);if(m>0&&n2>0)t=m/(m+n2);}}
+   const o=addPoint(lp(pt(h.l.a).p,pt(h.l.b).p,t));score(onAlpha(o.p));
+   log(`Точка ${o.name} на ${pt(h.l.a).name}${pt(h.l.b).name}`,`Делит отрезок в отношении ${rnd(t,2)} : ${rnd(1-t,2)}.`);
+   computeSection();return say('Точка '+o.name);}
+  const fi=pickF(x,y);if(fi>=0){snap();const o=addPoint(A.F[fi].c);score(false);
+   log(`Точка ${o.name} — центр грани ${A.F[fi].name}`,'Точка лежит в плоскости грани.');
+   computeSection();return say('Точка: '+o.name);}
+  return say('Нажми на прямую или грань.');}
+ if(T==='del'){const p=pickP(x,y);
+  if(p&&p.kind!=='vertex'){snap();A.Ln=A.Ln.filter(l=>l.a!==p.id&&l.b!==p.id);A.P=A.P.filter(q=>q.id!==p.id);
+   computeSection();return say('Точка удалена.');}
+  const h=pickL(x,y);if(h&&h.l.kind!=='edge'){snap();A.Ln=A.Ln.filter(l=>l.id!==h.l.id);computeSection();return say('Линия удалена.');}
+  say('Удалять можно только построенные объекты.');}}
+function parallelTo(lineId,pid){const l=A.Ln.find(x=>x.id===lineId),Q=pt(pid),d=nz(dirOf(l));
+ const f=A.F.find(f=>visF(f)&&Math.abs(dt(f.n,Q.p)-f.d)<EPS*A.size*4&&Math.abs(dt(f.n,d))<1e-6);
+ if(!f)return say('В этой грани параллельную через точку провести нельзя.');
+ let t1=-1e9,t2=1e9;
+ for(let i=0;i<f.v.length;i++){const a=pt(f.v[i]).p,b=pt(f.v[(i+1)%f.v.length]).p;
+  const nIn=nz(cr(f.n,sb(b,a))),den=dt(nIn,d);if(Math.abs(den)<1e-9)continue;
+  const t=(dt(nIn,a)-dt(nIn,Q.p))/den,sg=dt(nIn,sb(f.c,a))>0?1:-1;
+  if(den*sg>0)t2=Math.min(t2,t);else t1=Math.max(t1,t);}
+ if(t1>=t2)return say('Не удалось построить отрезок в грани.');
+ snap();const p1=addPoint(ad(Q.p,ml(d,t1))),p2=addPoint(ad(Q.p,ml(d,t2)));
+ A.Ln.push({id:++uid,a:p1.id,b:p2.id,kind:'sec',ext:false,st:A.maxStage,fs:[]});
+ score(onAlpha(p1.p)&&onAlpha(p2.p));
+ log(`Через ${Q.name} проведена прямая ∥ ${pt(l.a).name}${pt(l.b).name}`,
+  'Две параллельные плоскости, пересечённые третьей, дают параллельные линии пересечения.','ok');
+ computeSection();say('Параллельная построена.');}
+const ptrs=new Map();let gest=null,space=false;
+const rel=e=>{const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};};
+cv.addEventListener('pointerdown',e=>{try{cv.setPointerCapture(e.pointerId);}catch(_){}
+ const p=rel(e);ptrs.set(e.pointerId,p);
+ if(ptrs.size===1)gest={mode:(e.button===2||space)?'pan':'rot',x:p.x,y:p.y,az:cam.az,el:cam.el,
+  px:cam.px,py:cam.py,t:performance.now(),moved:0,id:e.pointerId};
+ else if(ptrs.size===2){const[a,b]=[...ptrs.values()];
+  gest={mode:'pinch',d:Math.hypot(a.x-b.x,a.y-b.y)||1,cx:(a.x+b.x)/2,cy:(a.y+b.y)/2,sc:cam.sc,px:cam.px,py:cam.py,moved:99};}
+ e.preventDefault();},{passive:false});
+cv.addEventListener('pointermove',e=>{const p=rel(e);
+ if(!ptrs.has(e.pointerId)){if(e.pointerType==='mouse'){const q=pickP(p.x,p.y),lz=q?null:pickL(p.x,p.y);
+   const nh=q?{t:'p',id:q.id}:(lz?{t:'l',id:lz.l.id}:null);
+   if(JSON.stringify(nh)!==JSON.stringify(hover)){hover=nh;dirty=true;cv.style.cursor=nh?'pointer':'crosshair';}}return;}
+ ptrs.set(e.pointerId,p);if(!gest)return;
+ if(gest.mode==='pinch'&&ptrs.size>=2){const[a,b]=[...ptrs.values()];
+  const d=Math.hypot(a.x-b.x,a.y-b.y)||1;
+  cam.sc=cl(gest.sc*(d/gest.d),4,4000);cam.px=gest.px+((a.x+b.x)/2-gest.cx);cam.py=gest.py+((a.y+b.y)/2-gest.cy);dirty=true;return;}
+ const dx=p.x-gest.x,dy=p.y-gest.y;gest.moved=Math.max(gest.moved,Math.hypot(dx,dy));
+ if(gest.moved<6)return;
+ if(gest.mode==='pan'){cam.px=gest.px+dx;cam.py=gest.py+dy;}
+ else{cam.az=gest.az-dx*.008;cam.el=cl(gest.el+dy*.008,-1.45,1.45);}dirty=true;},{passive:false});
+function ptrEnd(e){const p=ptrs.get(e.pointerId);ptrs.delete(e.pointerId);
+ if(gest&&gest.id===e.pointerId&&gest.moved<7&&p){
+  const long=performance.now()-gest.t>550;
+  if(A.tool==='par'&&A.sel.length===1){const q=pickP(p.x,p.y);
+   if(q){const id=A.sel[0].id;A.sel=[];parallelTo(id,q.id);gest=null;return;}}
+  click(p.x,p.y,long||e.shiftKey);}
+ if(ptrs.size===0)gest=null;
+ else if(ptrs.size===1){const[a]=[...ptrs.values()];
+  gest={mode:'rot',x:a.x,y:a.y,az:cam.az,el:cam.el,px:cam.px,py:cam.py,t:performance.now(),moved:99};}}
+cv.addEventListener('pointerup',ptrEnd);cv.addEventListener('pointercancel',ptrEnd);
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('dblclick',e=>e.preventDefault());
+cv.addEventListener('wheel',e=>{e.preventDefault();cam.sc=cl(cam.sc*Math.exp(-e.deltaY*.0012),4,4000);dirty=true;},{passive:false});
+addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
+ if(e.code==='Space'){space=true;e.preventDefault();}
+ if(e.key==='Escape'){A.sel=[];dirty=true;}
+ if(e.ctrlKey&&e.key.toLowerCase()==='z'){e.preventDefault();undo();}
+ if(e.ctrlKey&&e.key.toLowerCase()==='y'){e.preventDefault();redo();}
+ if(e.key.toLowerCase()==='f')fitCam(cam,W,H);
+ const n=parseInt(e.key);if(!isNaN(n)&&!e.ctrlKey)setTool(TOOLS[(n+9)%10][0]);});
+addEventListener('keyup',e=>{if(e.code==='Space')space=false;});
+
+/*=========== 10. ИЗМЕРЕНИЯ ===========*/
+function measure(){const o=document.getElementById('m-out');
+ if(A.goal&&A.goal.type==='perp'){const f=A.F[A.goal.face],M=pt(A.goal.M),h=Math.abs(dt(f.n,M.p)-f.d);
+  o.innerHTML=[['Точка',M.name],['Плоскость',f.name],['Расстояние',rnd(h,4)],['Основание H',A.goal.Hname||'—']]
+   .map(([k,v])=>`<div><span>${k}</span><b>${v}</b></div>`).join('');
+  document.getElementById('m-why').textContent='Расстояние = |n·M − d| при единичной нормали n.';return;}
+ if(!secOK()){o.innerHTML='<div><span>Сечение</span><b>не определено</b></div>';return;}
+ const P=A.secPoly,S=polyArea(P),per=polyPer(P),base=A.F[0];
+ const ang=Math.acos(cl(Math.abs(dt(A.alpha.n,base.n)),0,1))*180/Math.PI;
+ const all=A.F.map(f=>f.v.map(id=>pt(id).p)),Vt=volFaces(all),below=[],above=[];
+ all.forEach(poly=>{const b=clipPoly(poly,A.alpha.n,A.alpha.d);if(b.length>2)below.push(b);
+  const a=clipPoly(poly,ml(A.alpha.n,-1),-A.alpha.d);if(a.length>2)above.push(a);});
+ let sec=P.slice();if(dt(polyN(sec),A.alpha.n)<0)sec.reverse();
+ below.push(sec);above.push(sec.slice().reverse());
+ const V1=volFaces(below),V2=volFaces(above);
+ const nm=['','','','треугольник','четырёхугольник','пятиугольник','шестиугольник','семиугольник','восьмиугольник'];
+ o.innerHTML=[['Тип',nm[P.length]||P.length+'-угольник'],['Вершин',P.length],['Периметр',rnd(per,3)],
+  ['Площадь',rnd(S,3)],['Стороны',P.map((p,i)=>rnd(ds(p,P[(i+1)%P.length]),2)).join(' · ')],
+  ['Угол с основанием',rnd(ang,2)+'°'],['Объём тела',rnd(Vt,3)],['V нижней',rnd(V1,3)],['V верхней',rnd(V2,3)],
+  ['V₁ : V₂',rnd(V1/(V2||1e-9),3)+' : 1']].map(([k,v])=>`<div><span>${k}</span><b>${v}</b></div>`).join('');
+ document.getElementById('m-why').textContent=
+  'Площадь: S=½|Σ[vᵢ×vᵢ₊₁]|. Объёмы: каждая грань отсекается полупространством, добавляется сам многоугольник сечения, далее V=⅙|Σ v₀·[vᵢ×vᵢ₊₁]|.';}
+
+/*=========== 11. ИНТЕРФЕЙС ===========*/
+const $=id=>document.getElementById(id);
+const tb=$('tools');
+TOOLS.forEach(([k,t])=>{const b=document.createElement('button');b.className='btn';b.dataset.k=k;
+ b.textContent=t;b.onclick=()=>setTool(k);tb.appendChild(b);});
+document.querySelectorAll('.tabs button[data-p]').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('.tabs button[data-p]').forEach(x=>x.classList.toggle('on',x===b));
+ ['task','gen','fig','meas','cfg'].forEach(p=>$('p-'+p).classList.toggle('hide',p!==b.dataset.p));
+ if(b.dataset.p==='meas')measure();});
+document.querySelectorAll('.tabs button[data-q]').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('.tabs button[data-q]').forEach(x=>x.classList.toggle('on',x===b));
+ ['proof','log'].forEach(q=>$('q-'+q).classList.toggle('hide',q!==b.dataset.q));});
+document.querySelectorAll('#t-lvl button').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('#t-lvl button').forEach(x=>x.classList.toggle('on',x===b));A.level=+b.dataset.l;uiDirty=true;});
+$('t-eye').onclick=()=>{A.hintOn=!A.hintOn;uiDirty=true;};
+function ui(){
+ [...tb.children].forEach(b=>b.classList.toggle('on',b.dataset.k===A.tool));
+ $('t-title').textContent=A.free?'Свободный режим':'Задание '+A.taskNo;
+ $('t-text').textContent=A.taskText||A.figName||'Строй свободно.';
+ $('t-nav').textContent=hint();
+ document.querySelector('#bar>i').style.width=((A.prog||0)*100)+'%';
+ const rec=A.Ln.filter(l=>l.kind!=='edge'&&visL(l)).map(l=>{const pl=planesOfL(l);
+  return`<div><span>${pl.length?pl.join(' ∩ '):'вне граней'}</span><b>${pt(l.a).name}${pt(l.b).name}${l.ext?' ⟶':''}</b></div>`;});
+ $('t-rec').innerHTML=`<div><span>Фигура</span><b>${A.figName}</b></div>`+
+  `<div><span>Этап</span><b>${A.stage} / ${A.maxStage}</b></div>`+
+  `<div><span>Плоскость α</span><b>${A.alpha?'('+(A.alpha.names||[]).join('')+')':'—'}</b></div>`+rec.join('');
+ $('t-cnt').textContent=`Количество действий: ${A.acts}. Из них ${A.good} верно.`;
+ $('t-help').innerHTML=MOB
+  ?'Вращение — одним пальцем, зум и сдвиг — двумя, действие — короткий тап, долгое нажатие на ребро — задать отношение m:n.'
+  :'<kbd>1</kbd>…<kbd>9</kbd> инструменты · <kbd>Esc</kbd> сброс · <kbd>Ctrl+Z</kbd>/<kbd>Ctrl+Y</kbd> · <kbd>пробел</kbd>+мышь — сдвиг · <kbd>F</kbd> — вписать';
+ renderSteps($('q-proof'),A.proof,'Здесь появится строгое поэтапное доказательство.');
+ renderSteps($('q-log'),A.log,'Здесь фиксируются твои действия.');}
+const SCH=[{k:'theme',t:'s',l:'Тема',o:[['light','Светлая'],['dark','Тёмная'],['blue','Ночная синяя']]},
+ {k:'proj',t:'s',l:'Проекция',o:[['ortho','Параллельная'],['persp','Центральная']]},
+ {k:'style',t:'s',l:'Стиль тела',o:[['wire','Каркас'],['glass','Стекло'],['solid','Сплошное']]},
+ {k:'hidden',t:'s',l:'Невидимые линии',o:[['dash','Пунктир'],['fade','Бледно'],['none','Скрыть']]},
+ {k:'faceOp',t:'r',l:'Заливка граней',mn:0,mx:.6,sp:.01},{k:'secOp',t:'r',l:'Заливка сечения',mn:0,mx:.7,sp:.01},
+ {k:'edgeW',t:'r',l:'Толщина рёбер',mn:.6,mx:4,sp:.1},{k:'ptR',t:'r',l:'Размер точек',mn:3,mx:11,sp:.5},
+ {k:'fs',t:'r',l:'Размер подписей',mn:9,mx:22,sp:1},
+ {k:'labels',t:'c',l:'Подписи'},{k:'grid',t:'c',l:'Сетка-пол'},{k:'shadow',t:'c',l:'Тень'},
+ {k:'axes',t:'c',l:'Оси'},{k:'light',t:'c',l:'Подсветка граней'},{k:'glow',t:'c',l:'Свечение сечения'},
+ {k:'rot',t:'c',l:'Автовращение'},{k:'mini',t:'c',l:'3D-витрина'},
+ {k:'edgeCol',t:'k',l:'Цвет рёбер'},{k:'secCol',t:'k',l:'Цвет сечения'},{k:'auxCol',t:'k',l:'Вспом. линии'},{k:'ptCol',t:'k',l:'Точки'}];
+function buildCfg(){const box=$('cfg-box');
+ box.innerHTML=SCH.map(s=>s.t==='s'?`<div class="fld"><label>${s.l}</label><select data-k="${s.k}">${s.o.map(([v,n])=>`<option value="${v}" ${CFG[s.k]===v?'selected':''}>${n}</option>`).join('')}</select></div>`
+  :s.t==='r'?`<div class="fld"><label>${s.l}</label><input type="range" data-k="${s.k}" min="${s.mn}" max="${s.mx}" step="${s.sp}" value="${CFG[s.k]}"></div>`
+  :s.t==='c'?`<div class="sw"><input type="checkbox" data-k="${s.k}" ${CFG[s.k]?'checked':''}><span>${s.l}</span></div>`
+  :`<div class="fld"><label>${s.l}</label><input type="color" data-k="${s.k}" value="${CFG[s.k]}"></div>`).join('');
+ box.querySelectorAll('[data-k]').forEach(el=>el.oninput=()=>{const k=el.dataset.k;
+  CFG[k]=el.type==='checkbox'?el.checked:(el.type==='range'?parseFloat(el.value):el.value);
+  localStorage.setItem('stCfg',JSON.stringify(CFG));applyTheme();dirty=true;});}
+function applyTheme(){document.body.classList.toggle('dark',CFG.theme==='dark');
+ document.body.classList.toggle('blue',CFG.theme==='blue');
+ $('mini').style.display=CFG.mini?'block':'none';$('miniOpen').style.display=CFG.mini?'none':'block';}
+function copyText(t){if(navigator.clipboard&&isSecureContext)
+  return navigator.clipboard.writeText(t).then(()=>say('Скопировано.'),()=>fallback(t));
+ fallback(t);
+ function fallback(x){const ta=document.createElement('textarea');ta.value=x;ta.style.position='fixed';
+  ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');say('Скопировано.');}catch(e){say('Копирование недоступно.');}
+  document.body.removeChild(ta);}}
+$('t-step').onclick=autoStep;
+$('t-ans').onclick=()=>{A.ans=!A.ans;dirty=true;if(A.ans)measure();};
+$('t-new').onclick=()=>{genTask($('g-method').value,$('g-level').value,$('g-fig').value);closeAll();};
+$('refresh').onclick=()=>{A.free?makeFigure(A.rec):genTask(A.method,$('g-level').value,$('g-fig').value,A.seed);};
+$('g-make').onclick=()=>{genTask($('g-method').value,$('g-level').value,$('g-fig').value);closeAll();};
+$('g-seed').onclick=()=>genTask(A.method,$('g-level').value,$('g-fig').value,A.seed);
+$('g-5').onclick=()=>{A.series=[];for(let i=0;i<5;i++)A.series.push({m:$('g-method').value,l:$('g-level').value,s:Math.floor(Math.random()*1e9)});
+ $('g-list').innerHTML=A.series.map((s,i)=>`<div><span>№${i+1} · ${s.m}</span><b><a href="#" data-i="${i}">открыть</a></b></div>`).join('');
+ $('g-list').querySelectorAll('a').forEach(a=>a.onclick=e=>{e.preventDefault();const s=A.series[+a.dataset.i];
+  genTask(s.m,s.l,'auto',s.s);closeAll();});};
+$('m-calc').onclick=measure;
+$('n-in').onclick=()=>{cam.sc=cl(cam.sc*1.18,4,4000);dirty=true;};
+$('n-out').onclick=()=>{cam.sc=cl(cam.sc/1.18,4,4000);dirty=true;};
+$('n-home').onclick=()=>{camT={az:-1.12,el:.3};fitCam(cam,W,H);};
+$('n-fit').onclick=()=>fitCam(cam,W,H);
+$('n-rot').onclick=()=>{CFG.rot=!CFG.rot;buildCfg();dirty=true;};
+$('mini-x').onclick=()=>{CFG.mini=false;applyTheme();buildCfg();};
+$('miniOpen').onclick=()=>{CFG.mini=true;applyTheme();buildCfg();};
+$('mini-r').oninput=e=>{mcam.az=+e.target.value/100;$('mini-v').value='free';};
+$('pr-clear').onclick=()=>{A.log=[];uiDirty=true;};
+const txtProof=()=>A.proof.map(s=>`${s.tag?'['+s.tag+'] ':''}${s.t}\n   ${s.w}`).join('\n\n');
+$('pr-copy').onclick=()=>copyText(txtProof());
+$('pr-print').onclick=()=>{const w=window.open('');
+ w.document.write('<meta charset="utf-8"><pre style="font:14px/1.7 Georgia;white-space:pre-wrap;padding:30px">'+txtProof().replace(/[<>]/g,'')+'</pre>');w.print();};
+const dl=(n,t,ty)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:ty}));a.download=n;a.click();};
+$('e-txt').onclick=()=>dl('dokazatelstvo.txt',txtProof(),'text/plain;charset=utf-8');
+$('e-png').onclick=()=>{const a=document.createElement('a');a.download='sechenie.png';a.href=cv.toDataURL();a.click();};
+$('e-save').onclick=()=>dl('scene.json',JSON.stringify({P:A.P,F:A.F,L:A.Ln,alpha:A.alpha,goal:A.goal,proof:A.proof,
+ log:A.log,size:A.size,center:A.center,maxStage:A.maxStage,figName:A.figName,taskText:A.taskText,uid}),'application/json');
+$('e-load').onclick=()=>$('e-file').click();
+$('e-file').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+ r.onload=()=>{try{const s=JSON.parse(r.result);Object.assign(A,{P:s.P,F:s.F,Ln:s.L,alpha:s.alpha,goal:s.goal,
+  proof:s.proof,log:s.log,size:s.size,center:s.center,maxStage:s.maxStage,figName:s.figName,taskText:s.taskText});
+  uid=s.uid;A.stage=A.maxStage;A.stageSteps=[];A.free=true;computeSection();buildPlan();fitCam(cam,W,H);say('Загружено.');}
+  catch(x){say('Файл не читается.');}};r.readAsText(f);};
+const ps=$('b-preset');
+ps.innerHTML='<option value="">— свои параметры —</option>'+ALLF.map(k=>`<option value="${k}">${REC[k].t}</option>`).join('');
+$('g-fig').innerHTML='<option value="auto">Подобрать автоматически</option>'+ALLF.map(k=>`<option value="${k}">${REC[k].t}</option>`).join('');
+ps.onchange=()=>{if(!ps.value)return;A.free=true;A.taskText='';makeFigure(REC[ps.value]);say('Нажимай «▶ Этап».');};
+$('b-base').onchange=()=>{const v=$('b-base').value;$('b-reg').style.display=v==='reg'?'':'none';
+ $('b-rect').style.display=v==='rect'?'':'none';$('b-cust').style.display=v==='custom'?'':'none';};
+$('b-body').onchange=()=>{const v=$('b-body').value;$('b-hull').style.display=v==='hull'?'':'none';
+ $('b-par').style.display=v==='hull'?'none':'';};
+$('b-n').oninput=()=>$('l-n').textContent=$('b-n').value;
+$('b-make').onclick=()=>{const bt=$('b-base').value;let base;
+ if(bt==='reg')base=regPoly(+$('b-n').value,+$('b-R').value,+$('b-rot').value*Math.PI/180);
+ else if(bt==='rect'){const a=+$('b-a').value/2,b=+$('b-b').value/2;base=[[-a,-b,0],[a,-b,0],[a,b,0],[-a,b,0]];}
+ else base=$('b-pts').value.trim().split('\n').map(s=>{const[x,y]=s.trim().split(/[\s,]+/).map(Number);return[x||0,y||0,0];});
+ if(base.length<3)return say('Нужно минимум 3 вершины.');
+ const h=+$('b-h').value,body=$('b-body').value;base=base.map(p=>[p[0],p[1],-h/2]);
+ const hp=$('b-hpts').value.trim().split('\n').map(s=>{const a=s.trim().split(/[\s,]+/).map(Number);return[a[0]||0,a[1]||0,a[2]||0];});
+ A.free=true;A.taskText='';
+ makeFigure({base,body,h:body==='prism'?h:h/2,k:+$('b-k').value,sx:+$('b-sx').value,sy:+$('b-sy').value,hpts:hp});
+ ps.value='';closeAll();say('Строй по этапам: «▶ Этап».');};
+$('b-step').onclick=nextStage;
+$('b-all').onclick=()=>{finishStages();say('Фигура достроена. Задай плоскость α (инструмент 9).');};
+
+/*=========== 12. МАКЕТ: ПК / АЛЬБОМ / ПОРТРЕТ ===========*/
+function closeAll(){document.querySelectorAll('aside').forEach(a=>a.classList.remove('open'));
+ $('scrim').classList.remove('on');tb.style.display='';
+ document.querySelectorAll('#mbar button').forEach(b=>b.classList.toggle('on',b.dataset.m==='tools'));}
+function openPanel(side,tab,q){
+ if(!MOB){if(tab)document.querySelector(`[data-p="${tab}"]`)?.click();return;}
+ const el=$(side),was=el.classList.contains('open');
+ closeAll();
+ if(!was){el.classList.add('open');$('scrim').classList.add('on');tb.style.display='none';}
+ if(tab)document.querySelector(`[data-p="${tab}"]`)?.click();
+ if(q)document.querySelector(`[data-q="${q}"]`)?.click();}
+$('scrim').onclick=closeAll;
+document.querySelectorAll('#mbar button').forEach(b=>b.addEventListener('click',()=>{
+ document.querySelectorAll('#mbar button').forEach(x=>x.classList.toggle('on',x===b));
+ const m=b.dataset.m;
+ if(m==='tools')closeAll();
+ else if(m==='proof')openPanel('R',null,'proof');
+ else if(m==='task')openPanel('L','task');
+ else if(m==='gen')openPanel('L','gen');
+ else openPanel('L','cfg');}));
+$('fsBtn').onclick=async()=>{try{
+ if(!document.fullscreenElement){await document.documentElement.requestFullscreen();
+  if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(()=>{});}
+ else await document.exitFullscreen();}catch(e){say('Полный экран недоступен.');}};
+/* перетаскивание нижней шторки в портрете */
+document.querySelectorAll('.grab').forEach(g=>{
+ let st=null;
+ g.addEventListener('pointerdown',e=>{if(LAY!=='port')return;g.setPointerCapture(e.pointerId);
+  st={y:e.clientY,h:g.parentElement.getBoundingClientRect().height};e.preventDefault();});
+ g.addEventListener('pointermove',e=>{if(!st)return;
+  const h=cl(st.h-(e.clientY-st.y),120,innerHeight*.9);
+  g.parentElement.style.setProperty('--shH',h+'px');});
+ g.addEventListener('pointerup',e=>{if(!st)return;
+  const h=g.parentElement.getBoundingClientRect().height;
+  if(h<170)closeAll();
+  else g.parentElement.style.setProperty('--shH',(h>innerHeight*.66?'88dvh':'52dvh'));
+  st=null;});});
+function layout(){
+ const w=innerWidth,h=innerHeight;
+ const coarse=matchMedia('(pointer:coarse)').matches;
+ const mode=(coarse||w<980||h<560)?(h>=w?'port':'land'):'desk';
+ if(mode!==LAY){LAY=mode;MOB=mode!=='desk';
+  document.body.classList.remove('lay-desk','lay-land','lay-port','mob');
+  document.body.classList.add('lay-'+mode);if(MOB)document.body.classList.add('mob');
+  closeAll();uiDirty=true;}
+ resize();fitCam(cam,W,H);}
+let rzT;const relayout=()=>{clearTimeout(rzT);rzT=setTimeout(layout,90);};
+addEventListener('resize',relayout);
+addEventListener('orientationchange',()=>setTimeout(layout,260));
+new ResizeObserver(()=>{resize();}).observe(document.querySelector('main'));
+
+/*=========== 13. СТАРТ ===========*/
+buildCfg();applyTheme();layout();genTask('trace','1','auto');fitCam(cam,W,H);requestAnimationFrame(loop);
+</script>
+</body>
+</html>
