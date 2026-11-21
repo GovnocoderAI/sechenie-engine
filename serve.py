@@ -17,7 +17,12 @@ import urllib.request, webbrowser, zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-INDEX = "stereo.html"
+INDEX = "index.html" if (ROOT / "index.html").exists() else "stereo.html"
+try:
+    sys.stdout.reconfigure(errors="replace")
+    sys.stderr.reconfigure(errors="replace")
+except Exception:
+    pass
 MARKER = "STEREO-APP-OK"          # метка в <meta> приложения — по ней проверяем туннель
 
 def c(t, col=""):
