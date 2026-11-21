@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="stereo-marker" content="STEREO-APP-OK">
+<meta name="app-version" content="3.2-parallel-figures">
 <title>Стереометрия · сечения, фигуры, доказательства</title>
 <style>
 :root{--bg:#eef0f6;--pan:#fff;--ink:#232640;--mut:#8a8fa8;--ln:#e6e8f2;--acc:#6c5ce7;--acc2:#39d0a7;
@@ -202,6 +203,8 @@ body.lay-land #msg{bottom:66px}
   <div class="lbl">2 · тело</div>
   <div class="fld"><label>Тип</label><select id="b-body"><option value="prism">Призма</option>
    <option value="pyr">Пирамида</option><option value="frus">Усечённая пирамида</option>
+   <option value="bipyr">Бипирамида (симметрия)</option>
+   <option value="antiprism">Антипризма (перенос + поворот)</option>
    <option value="hull">Выпуклая оболочка точек</option></select></div>
   <div id="b-par"><div class="g2">
    <div class="fld"><label>Высота h</label><input type="number" id="b-h" value="2" step=".1"></div>
@@ -218,6 +221,25 @@ body.lay-land #msg{bottom:66px}
   <div class="row" style="margin-top:12px"><button class="btn p" id="b-make">Построить</button>
    <button class="btn" id="b-step">▶ Этап</button><button class="btn" id="b-all">Готово ⏭</button></div>
   <div class="hint">Каждый этап добавляет элементы тела и строгую запись с обоснованием.</div>
+  <div class="lbl">3 · преобразования</div>
+  <div class="g2">
+   <div class="fld"><label>Перенос x</label><input type="number" id="x-tx" value="0" step=".1"></div>
+   <div class="fld"><label>Перенос y</label><input type="number" id="x-ty" value="0" step=".1"></div>
+  </div>
+  <div class="fld"><label>Перенос z</label><input type="number" id="x-tz" value="0" step=".1"></div>
+  <div class="row"><button class="btn" id="x-move">Перенести</button><button class="btn" id="x-copy">Копия + оболочка</button></div>
+  <div class="fld"><label>Плоскость симметрии</label><select id="x-plane">
+   <option value="XY">XY · z = d</option><option value="YZ">YZ · x = d</option><option value="XZ">XZ · y = d</option>
+   <option value="custom">Своя плоскость n·x = d</option></select></div>
+  <div class="fld"><label>d</label><input type="number" id="x-d" value="0" step=".1"></div>
+  <div id="x-custom" style="display:none" class="g2">
+   <div class="fld"><label>n x</label><input type="number" id="x-nx" value="0" step=".1"></div>
+   <div class="fld"><label>n y</label><input type="number" id="x-ny" value="0" step=".1"></div>
+   <div class="fld"><label>n z</label><input type="number" id="x-nz" value="1" step=".1"></div>
+  </div>
+  <div class="row"><button class="btn" id="x-reflect">Отразить</button><button class="btn" id="x-rcopy">Копия + оболочка</button></div>
+  <div class="row"><button class="btn sm" id="x-reset">Сброс преобразований</button></div>
+  <div class="hint">Копия + оболочка строит выпуклую оболочку исходного и преобразованного тела. Так получаются бипирамиды и составные тела.</div>
  </div>
  <div class="pane hide" id="p-meas"><h3>Измерения</h3>
   <div class="row"><button class="btn p" id="m-calc">Пересчитать</button></div>
@@ -348,9 +370,14 @@ const renderSteps=(el,arr,empty)=>{el.innerHTML=arr.map((s,i)=>
 const S1='₁';
 const regPoly=(n,R,rot)=>{const a=[];for(let i=0;i<n;i++){const t=rot+2*Math.PI*i/n;a.push([R*Math.cos(t),R*Math.sin(t),0]);}return a;};
 const bNames=n=>{const s=[];for(let i=0;i<n;i++)s.push(String.fromCharCode(65+i));return s;};
+const cloneRec=r=>JSON.parse(JSON.stringify(r));
+const reflectPt=(p,x)=>sb(p,ml(x.n,2*(dt(x.n,p)-x.d)));
+const applyXf=(p,xs)=>(xs||[]).reduce((q,x)=>x.k==='t'?ad(q,x.v):reflectPt(q,x),p);
 function makeFigure(rec){
+ rec=cloneRec(rec);const xfs=rec.xf||[];
  A.P=[];A.F=[];A.Ln=[];A.sel=[];A.acts=0;A.good=0;A.done=false;A.ans=false;A.alpha=null;A.goal=null;
  A.plan=[];A.planI=0;A.proof=[];A.log=[];A.given=[];uid=0;A.hist=[];A.fut=[];A.rec=rec;
+ if(!xfs.length)A.rec0=cloneRec(rec);
  const V={},E=[],FS=[],ST=[];
  if(rec.body==='hull'){
   const pts=rec.hpts,nm=pts.map((_,i)=>String.fromCharCode(65+i));
@@ -360,11 +387,11 @@ function makeFigure(rec){
    for(let i=0;i<poly.length;i++)E.push([nm[poly[i]],nm[poly[(i+1)%poly.length]],1]);});
   ST.push({t:'Отмечаем данные точки',w:'Точки не лежат в одной плоскости, поэтому определяют невырожденное тело.'});
   ST.push({t:'Строим выпуклую оболочку',w:'Каждая грань лежит в опорной плоскости: все прочие точки — в одном полупространстве относительно неё, значит грани плоские, а тело выпукло.'});
-  A.figName='Выпуклая оболочка';
+  A.figName=rec.t||'Выпуклая оболочка';
  }else{
   const B=rec.base,n=B.length,nm=bNames(n);
   B.forEach((p,i)=>V[nm[i]]={p,st:0});
-  for(let i=0;i<n;i++)E.push([nm[i],nm[(i+1)%n],0]);FS.push({v:nm.slice(),st:0});
+  for(let i=0;i<n;i++)E.push([nm[i],nm[(i+1)%n],0]);if(rec.body!=='bipyr')FS.push({v:nm.slice(),st:0});
   ST.push({t:`Строим основание ${nm.join('')}`,
    w:'Три его вершины не лежат на одной прямой ⇒ через них проходит единственная плоскость π (аксиома A₁); остальные вершины строим в этой же плоскости.'});
   if(rec.body==='prism'){const v=[rec.sx,rec.sy,rec.h],tn=nm.map(x=>x+S1);
@@ -393,7 +420,28 @@ function makeFigure(rec){
     w:`Две параллельные плоскости, пересечённые третьей, дают параллельные линии пересечения ⇒ ${tn[0]}${tn[1]}∥${nm[0]}${nm[1]}; верхнее основание подобно нижнему с k=${k}.`});
    ST.push({t:'Отбрасываем верхнюю пирамиду',w:'Боковые грани усечённой пирамиды — трапеции: их основания лежат на параллельных прямых одной плоскости.'});
    A.figName='Усечённая пирамида '+nm.join('')+tn.join('');}
+  if(rec.body==='bipyr'){const ap=[rec.sx,rec.sy,rec.h],ap2=[rec.sx,rec.sy,-rec.h];
+   V['S']={p:ap,st:1};V['S'+S1]={p:ap2,st:1};
+   nm.forEach(x=>{E.push([x,'S',1]);E.push([x,'S'+S1,1]);});
+   nm.forEach((x,i)=>{FS.push({v:['S',x,nm[(i+1)%n]],st:2});FS.push({v:['S'+S1,nm[(i+1)%n],x],st:2});});
+   ST.push({t:'Строим вершины S и S₁ по разные стороны основания',w:'Симметрия относительно плоскости основания переводит S в S₁; обе точки не лежат в плоскости основания.'});
+   ST.push({t:'Соединяем S и S₁ с вершинами основания',w:'Каждая пара соседних вершин основания вместе с S или S₁ задаёт треугольную грань. Тело симметрично относительно плоскости основания.'});
+   A.figName='Бипирамида S'+nm.join('')+S1;}
+  if(rec.body==='antiprism'){const tn=nm.map(x=>x+S1),ang=rec.twist||Math.PI/n;
+   let bc=[0,0,0];B.forEach(p=>bc=ad(bc,p));bc=ml(bc,1/n);
+   const ca=Math.cos(ang),sa=Math.sin(ang);
+   nm.forEach((x,i)=>{const dx=B[i][0]-bc[0],dy=B[i][1]-bc[1];
+    V[tn[i]]={p:[bc[0]+dx*ca-dy*sa+rec.sx,bc[1]+dx*sa+dy*ca+rec.sy,bc[2]+rec.h],st:1};});
+   for(let i=0;i<n;i++)E.push([tn[i],tn[(i+1)%n],2]);
+   for(let i=0;i<n;i++){const j=(i+1)%n;
+    FS.push({v:[nm[i],nm[j],tn[i]],st:2});FS.push({v:[nm[j],tn[j],tn[i]],st:2});
+    E.push([nm[i],tn[i],2]);E.push([nm[j],tn[i],2]);}
+   FS.push({v:tn.slice(),st:2});
+   ST.push({t:'Строим верхнее основание переносом и поворотом',w:`Верхняя ${n}-угольная копия получена параллельным переносом на вектор v и поворотом на ${rnd(ang*180/Math.PI,1)}° вокруг общей оси; основания параллельны.`});
+   ST.push({t:'Соединяем основания треугольниками',w:'Каждая сторона нижнего основания и ближайшая вершина верхнего задают треугольную грань; всего 2n боковых треугольников. Тело выпукло.'});
+   A.figName='Антипризма '+nm.join('')+tn.join('');}
  }
+ if(xfs.length)for(const n in V)V[n].p=applyXf(V[n].p,xfs);
  A.maxStage=Math.max(0,...FS.map(f=>f.st),...E.map(e=>e[2]));
  const ids={};for(const n in V){const o={id:++uid,p:V[n].p,name:n,kind:'vertex',st:V[n].st,hide:V[n].hide};A.P.push(o);ids[n]=o.id;}
  let C=[0,0,0];A.P.forEach(p=>C=ad(C,p.p));C=ml(C,1/A.P.length);A.center=C;
@@ -408,6 +456,11 @@ function makeFigure(rec){
  A.Ln.forEach(l=>A.F.forEach((f,i)=>{if(f.v.includes(l.a)&&f.v.includes(l.b))l.fs.push(i);}));
  A.stage=0;A.stageSteps=ST;A.stepPtr=0;
  proofBlock('Фигура',A.figName,'Построение по этапам — кнопка «▶ Этап» во вкладке «Фигура».','given');
+ xfs.forEach(x=>proofBlock('Преобразование',
+  x.k==='t'?`Параллельный перенос на вектор (${x.v.map(v=>rnd(v,2)).join('; ')})`
+   :`Зеркальная симметрия относительно плоскости ${x.label||''}`.trim(),
+  x.k==='t'?'Параллельный перенос — движение: сохраняет расстояния, углы и объёмы. Полученное тело равно исходному.'
+   :'Зеркальная симметрия — движение: сохраняет расстояния, углы и объёмы. Полученное тело равно исходному.','given'));
  dirty=uiDirty=true;fitCam(cam,W,H);}
 const visP=p=>p.st<=A.stage&&(p.hide===undefined||A.stage<p.hide);
 const visL=l=>l.st<=A.stage&&(l.hide===undefined||A.stage<l.hide);
@@ -416,6 +469,10 @@ const applyStage=s=>{A.stage=cl(s,0,A.maxStage);computeSection();dirty=uiDirty=t
 function nextStage(){if(A.stage>=A.maxStage)return say('Фигура построена полностью.');
  applyStage(A.stage+1);if(A.stepPtr<A.stageSteps.length){const s=A.stageSteps[A.stepPtr++];proofBlock('Этап '+A.stage,s.t,s.w);}}
 function finishStages(){while(A.stepPtr<A.stageSteps.length){const s=A.stageSteps[A.stepPtr++];proofBlock('Этап',s.t,s.w);}applyStage(A.maxStage);}
+const PHI=(1+Math.sqrt(5))/2,IPHI=1/PHI;
+const dodecaPts=()=>{const a=[];for(const x of[-1,1])for(const y of[-1,1])for(const z of[-1,1])a.push([x,y,z]);
+ for(const p of[-IPHI,IPHI])for(const q of[-PHI,PHI]){a.push([0,p,q]);a.push([p,q,0]);a.push([q,0,p]);}return a;};
+const icosaPts=()=>{const a=[];for(const p of[-1,1])for(const q of[-PHI,PHI]){a.push([0,p,q]);a.push([p,q,0]);a.push([q,0,p]);}return a;};
 const REC={
  tetra:{t:'Тетраэдр',base:regPoly(3,1.25,1.9).map(p=>[p[0],p[1],-.9]),body:'pyr',h:1.05,sx:.05,sy:.05},
  cube:{t:'Куб',base:[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1]],body:'prism',h:2,sx:0,sy:0},
@@ -425,8 +482,34 @@ const REC={
  pyr6:{t:'Пирамида 6-угольная',base:regPoly(6,1.15,0).map(p=>[p[0],p[1],-.9]),body:'pyr',h:1.5,sx:.1,sy:0},
  prism3:{t:'Призма 3-угольная',base:regPoly(3,1.2,1.9).map(p=>[p[0],p[1],-1]),body:'prism',h:2,sx:0,sy:0},
  prism6:{t:'Призма 6-угольная',base:regPoly(6,1.1,0).map(p=>[p[0],p[1],-1]),body:'prism',h:2,sx:0,sy:0},
- frus4:{t:'Усечённая пирамида',base:[[-1.2,-1.2,-1],[1.2,-1.2,-1],[1.2,1.2,-1],[-1.2,1.2,-1]],body:'frus',h:1.6,k:.55,sx:0,sy:0}};
-const PRISMS=['cube','box','obl','prism3','prism6'],ALLF=Object.keys(REC);
+ frus4:{t:'Усечённая пирамида',base:[[-1.2,-1.2,-1],[1.2,-1.2,-1],[1.2,1.2,-1],[-1.2,1.2,-1]],body:'frus',h:1.6,k:.55,sx:0,sy:0},
+ tetraReg:{t:'Правильный тетраэдр',body:'hull',hpts:[[1,1,1],[1,-1,-1],[-1,1,-1],[-1,-1,1]]},
+ octa:{t:'Октаэдр',body:'hull',hpts:[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]]},
+ dodeca:{t:'Додекаэдр',body:'hull',hpts:dodecaPts()},
+ icosa:{t:'Икосаэдр',body:'hull',hpts:icosaPts()}};
+[4,5,8,10,12].forEach(n=>{REC['prism'+n]={t:`Призма ${n}-угольная`,base:regPoly(n,1.15,0).map(p=>[p[0],p[1],-1]),body:'prism',h:2,sx:0,sy:0};});
+[3,5,8,10,12].forEach(n=>{REC['pyr'+n]={t:`Пирамида ${n}-угольная`,base:regPoly(n,1.15,(n%2)*Math.PI/n).map(p=>[p[0],p[1],-1]),body:'pyr',h:1.5,sx:0,sy:0};});
+[3,5,6,8,10,12].forEach(n=>{REC['frus'+n]={t:`Усечённая пирамида ${n}-угольная`,base:regPoly(n,1.15,0).map(p=>[p[0],p[1],-1]),body:'frus',h:1.6,k:.55,sx:0,sy:0};});
+[3,4,6].forEach(n=>{REC['obl'+n]={t:`Наклонная призма ${n}-угольная`,base:regPoly(n,1.1,0).map(p=>[p[0],p[1],-1]),body:'prism',h:1.9,sx:.85,sy:.3};});
+[3,4,5,6].forEach(n=>{REC['bipyr'+n]={t:`Бипирамида ${n}-угольная`,base:regPoly(n,1.15,0),body:'bipyr',h:n===4?1.15:1.25,sx:0,sy:0};});
+[3,4,5,6].forEach(n=>{REC['antiprism'+n]={t:`Антипризма ${n}-угольная`,base:regPoly(n,1.05,0).map(p=>[p[0],p[1],-1]),body:'antiprism',h:1.9,sx:0,sy:0};});
+const ALLF=Object.keys(REC);
+const PARALLEL_FIGS=['cube','box','obl','obl3','obl4','obl6','prism3','prism4','prism5','prism6','prism8','prism10','prism12','frus3','frus4','frus5','frus6','frus8','frus10','frus12','antiprism3','antiprism4','antiprism5','antiprism6','octa','dodeca','icosa'];
+const PRISMS=PARALLEL_FIGS;
+const FIG_GROUPS=[
+ {g:'Платоновы тела',k:['tetraReg','cube','octa','dodeca','icosa']},
+ {g:'Параллелепипеды',k:['box','obl','obl3','obl4','obl6']},
+ {g:'Призмы',k:['prism3','prism4','prism5','prism6','prism8','prism10','prism12']},
+ {g:'Пирамиды',k:['tetra','pyr3','pyr4','pyr5','pyr6','pyr8','pyr10','pyr12']},
+ {g:'Усечённые пирамиды',k:['frus3','frus4','frus5','frus6','frus8','frus10','frus12']},
+ {g:'Бипирамиды',k:['bipyr3','bipyr4','bipyr5','bipyr6']},
+ {g:'Антипризмы',k:['antiprism3','antiprism4','antiprism5','antiprism6']}];
+function figOptions(){const used=new Set();let h='';
+ FIG_GROUPS.forEach(gr=>{const keys=gr.k.filter(k=>REC[k]&&!used.has(k));if(!keys.length)return;
+  keys.forEach(k=>used.add(k));h+=`<optgroup label="${gr.g}">`+keys.map(k=>`<option value="${k}">${REC[k].t}</option>`).join('')+`</optgroup>`;});
+ const rest=ALLF.filter(k=>!used.has(k));
+ if(rest.length)h+=`<optgroup label="Прочее">`+rest.map(k=>`<option value="${k}">${REC[k].t}</option>`).join('')+`</optgroup>`;
+ return h;}
 
 /*=========== 4. СЕЧЕНИЕ ===========*/
 function faceCut(f,pl){const P=f.v.map(id=>pt(id).p),sd=P.map(v=>dt(pl.n,v)-pl.d),o=[],e=EPS*A.size;
@@ -505,6 +588,9 @@ function buildPlan(){A.plan=[];A.planI=0;A.vname=new Map();
      traceN:nm(bs.a)+nm(bs.b),edge:eName(e),eIn:r.t2>-1e-3&&r.t2<1+1e-3,eY:eName(edgeAt(Y,s.f))});
     known.add(KEY(Y));built.add(i);did=true;break;}});
   if(!did)break;}
+ A.secSegs.forEach((s,i)=>{if(built.has(i))return;
+  A.plan.push({kind:'connect',i,X:s.a,Y:s.b,f:s.f,nx:nm(s.a),ny:nm(s.b),fallback:true});
+  known.add(KEY(s.a));known.add(KEY(s.b));built.add(i);});
  buildProof();}
 const emitPerpProof=Hn=>{const f=A.F[A.goal.face],M=pt(A.goal.M).name;
  proofBlock('Доказательство',`${M}${Hn} ⟂ ${f.name}`,
@@ -521,7 +607,8 @@ function buildProof(){
  proofBlock('Шаг 1','Плоскость α определена однозначно',A.alpha.reason||'Через три точки, не лежащие на одной прямой, проходит плоскость, и притом только одна (A₁).');
  A.plan.forEach((s,k)=>{const F=A.F[s.f].name;
   if(s.kind==='connect')proofBlock('Шаг '+(k+2),`α ∩ ${F} = [${s.nx}${s.ny}]`,
-   `${s.nx},${s.ny} ∈ α и одновременно ${s.nx},${s.ny} ∈ ${F}. Если две точки прямой принадлежат плоскости, то и вся прямая принадлежит ей (A₂), значит ${s.nx}${s.ny} ⊂ α и ${s.nx}${s.ny} ⊂ ${F}. Плоскости различны, их пересечение — прямая (A₃), поэтому ${s.nx}${s.ny} = α ∩ ${F}.`);
+   s.fallback?`${s.nx} и ${s.ny} — вершины сечения: каждая лежит на ребре грани ${F} и в плоскости α. По A₂ и A₃ прямая ${s.nx}${s.ny} принадлежит и α, и ${F}, значит это их линия пересечения.`
+    :`${s.nx},${s.ny} ∈ α и одновременно ${s.nx},${s.ny} ∈ ${F}. Если две точки прямой принадлежат плоскости, то и вся прямая принадлежит ей (A₂), значит ${s.nx}${s.ny} ⊂ α и ${s.nx}${s.ny} ⊂ ${F}. Плоскости различны, их пересечение — прямая (A₃), поэтому ${s.nx}${s.ny} = α ∩ ${F}.`);
   if(s.kind==='par')proofBlock('Шаг '+(k+2),`α ∩ ${F} = [${s.nx}${s.ny}], ${s.nx}${s.ny} ∥ ${s.ngx}${s.ngy}`,
    `Грани ${F} и ${A.F[s.g].name} лежат в параллельных плоскостях и обе пересечены α. Если две параллельные плоскости пересечены третьей, линии пересечения параллельны, поэтому след в ${F} параллелен ${s.ngx}${s.ngy}. Проводим через ${s.nx} прямую, параллельную ${s.ngx}${s.ngy}; её пересечение с ребром даёт ${s.ny}.`);
   if(s.kind==='trace')proofBlock('Шаг '+(k+2),`${s.nT} = ${s.traceN} ∩ ${s.edge}; α ∩ ${F} = [${s.nx}${s.ny}]`,
@@ -536,11 +623,16 @@ const NICE=[1/2,1/3,2/3,1/4,3/4,2/5,3/5];
 const facePairs=ps=>{let c=0;for(let i=0;i<3;i++)for(let j=i+1;j<3;j++)
  if(A.F.some(f=>visF(f)&&Math.abs(dt(f.n,ps[i])-f.d)<EPS*A.size*4&&Math.abs(dt(f.n,ps[j])-f.d)<EPS*A.size*4))c++;return c;};
 function genTask(method,level,figKey,seed){
- A.method=method==='any'?pick(['trace','parallel','perp']):method;
  A.seed=seed||Math.floor(Math.random()*1e9);srand(A.seed);
+ A.method=method==='any'?pick(['trace','parallel','perp']):method;
+ if(A.method==='parallel'&&figKey&&figKey!=='auto'&&!PARALLEL_FIGS.includes(figKey)){
+  say('У этого тела нет параллельных граней — выбери другое тело или метод.');return false;}
  const lv=+level,figs=figKey&&figKey!=='auto'?[figKey]:(A.method==='parallel'?PRISMS:ALLF);
  for(let tf=0;tf<40;tf++){
-  const fk=pick(figs);makeFigure(REC[fk]);finishStages();
+  const fk=pick(figs);const bn=REC[fk].base?REC[fk].base.length:(REC[fk].hpts?REC[fk].hpts.length:0);
+  const tetraLike=REC[fk].body==='hull'?bn===4:(REC[fk].body==='pyr'&&bn===3);
+  if(A.method!=='perp'&&tetraLike&&lv!==0)continue;
+  makeFigure(REC[fk]);finishStages();
   if(A.method==='perp'){if(makePerpTask(lv))return true;continue;}
   const edges=A.Ln.filter(l=>l.kind==='edge');
   for(let t=0;t<260;t++){
@@ -562,7 +654,7 @@ function genTask(method,level,figKey,seed){
    A.goal=null;
    A.taskText=`Построй сечение тела «${REC[fk].t}» плоскостью, проходящей через точки M, N, P.`+
     (A.method==='parallel'?' Подсказка: следы в параллельных гранях параллельны.':'');
-   computeSection();buildPlan();A.taskNo++;A.free=false;A.done=false;
+   computeSection();buildPlan();if(!A.plan.length)continue;A.taskNo++;A.free=false;A.done=false;
    log('Новое задание: '+REC[fk].t,A.taskText,'ok');fitCam(cam,W,H);uiDirty=dirty=true;return true;}}
  say('Не удалось подобрать задание — смени параметры.');return false;}
 function makePerpTask(lv){
@@ -572,7 +664,7 @@ function makePerpTask(lv){
    if(f.v.includes(M.id))continue;
    const h=dt(f.n,M.p)-f.d;if(Math.abs(h)<.3*A.size/2)continue;
    const H=sb(M.p,ml(f.n,h));
-   const inside=f.v.every((id,i)=>dt(cr(f.n,sb(pt(f.v[(i+1)%f.v.length]).p,pt(id).p)),sb(H,pt(id).p))<=EPS*A.size);
+   const inside=f.v.every((id,i)=>dt(cr(f.n,sb(pt(f.v[(i+1)%f.v.length]).p,pt(id).p)),sb(H,pt(id).p))>=-EPS*A.size);
    if(lv===0&&!inside)continue;
    A.alpha=null;A.goal={type:'perp',M:M.id,face:fi,H};
    A.given=[{name:M.name,desc:`${M.name} ∉ ${f.name}`}];
@@ -887,19 +979,27 @@ function click(x,y,long){
   const h=pickL(x,y);if(h&&h.l.kind!=='edge'){snap();A.Ln=A.Ln.filter(l=>l.id!==h.l.id);computeSection();return say('Линия удалена.');}
   say('Удалять можно только построенные объекты.');}}
 function parallelTo(lineId,pid){const l=A.Ln.find(x=>x.id===lineId),Q=pt(pid),d=nz(dirOf(l));
- const f=A.F.find(f=>visF(f)&&Math.abs(dt(f.n,Q.p)-f.d)<EPS*A.size*4&&Math.abs(dt(f.n,d))<1e-6);
- if(!f)return say('В этой грани параллельную через точку провести нельзя.');
- let t1=-1e9,t2=1e9;
- for(let i=0;i<f.v.length;i++){const a=pt(f.v[i]).p,b=pt(f.v[(i+1)%f.v.length]).p;
-  const nIn=nz(cr(f.n,sb(b,a))),den=dt(nIn,d);if(Math.abs(den)<1e-9)continue;
-  const t=(dt(nIn,a)-dt(nIn,Q.p))/den,sg=dt(nIn,sb(f.c,a))>0?1:-1;
-  if(den*sg>0)t2=Math.min(t2,t);else t1=Math.max(t1,t);}
- if(t1>=t2)return say('Не удалось построить отрезок в грани.');
- snap();const p1=addPoint(ad(Q.p,ml(d,t1))),p2=addPoint(ad(Q.p,ml(d,t2)));
- A.Ln.push({id:++uid,a:p1.id,b:p2.id,kind:'sec',ext:false,st:A.maxStage,fs:[]});
+ const tol=EPS*A.size*4,linePlane=A.F.find(f=>Math.abs(dt(f.n,pt(l.a).p)-f.d)<tol&&Math.abs(dt(f.n,pt(l.b).p)-f.d)<tol);
+ const cutFace=f=>{let t1=-1e9,t2=1e9;
+  for(let i=0;i<f.v.length;i++){const a=pt(f.v[i]).p,b=pt(f.v[(i+1)%f.v.length]).p;
+   const nIn=nz(cr(f.n,sb(b,a))),den=dt(nIn,d);if(Math.abs(den)<1e-9)continue;
+   const t=(dt(nIn,a)-dt(nIn,Q.p))/den,sg=dt(nIn,sb(f.c,a))>0?1:-1;
+   if(den*sg>0)t1=Math.max(t1,t);else t2=Math.min(t2,t);}
+  if(t1>=t2||!Number.isFinite(t1)||!Number.isFinite(t2))return null;
+  return{t1,t2,len:t2-t1};};
+ const cands=A.F.filter(f=>visF(f)&&Math.abs(dt(f.n,Q.p)-f.d)<tol&&Math.abs(dt(f.n,d))<1e-6)
+  .map(f=>({f,r:cutFace(f)})).filter(o=>o.r);
+ if(!cands.length)return say('В этой грани параллельную через точку провести нельзя.');
+ let best=cands.find(o=>o.f===linePlane);
+ if(!best&&linePlane)best=cands.find(o=>dt(o.f.n,linePlane.n)<-.999);
+ if(!best)best=cands.slice().sort((a,b)=>b.r.len-a.r.len)[0];
+ const f=best.f,p1=addPoint(ad(Q.p,ml(d,best.r.t1))),p2=addPoint(ad(Q.p,ml(d,best.r.t2)));
+ snap();A.Ln.push({id:++uid,a:p1.id,b:p2.id,kind:'sec',ext:false,st:A.maxStage,fs:[]});
  score(onAlpha(p1.p)&&onAlpha(p2.p));
+ const same=f===linePlane;
  log(`Через ${Q.name} проведена прямая ∥ ${pt(l.a).name}${pt(l.b).name}`,
-  'Две параллельные плоскости, пересечённые третьей, дают параллельные линии пересечения.','ok');
+  same?'В плоскости грани через точку проходит единственная прямая, параллельная данной (аксиома параллельности).'
+   :'Две параллельные плоскости, пересечённые третьей, дают параллельные линии пересечения.','ok');
  computeSection();say('Параллельная построена.');}
 const ptrs=new Map();let gest=null,space=false;
 const rel=e=>{const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};};
@@ -1031,7 +1131,7 @@ function copyText(t){if(navigator.clipboard&&isSecureContext)
 $('t-step').onclick=autoStep;
 $('t-ans').onclick=()=>{A.ans=!A.ans;dirty=true;if(A.ans)measure();};
 $('t-new').onclick=()=>{genTask($('g-method').value,$('g-level').value,$('g-fig').value);closeAll();};
-$('refresh').onclick=()=>{A.free?makeFigure(A.rec):genTask(A.method,$('g-level').value,$('g-fig').value,A.seed);};
+$('refresh').onclick=()=>{(A.free&&A.rec)?makeFigure(A.rec):genTask(A.method,$('g-level').value,$('g-fig').value,A.seed);};
 $('g-make').onclick=()=>{genTask($('g-method').value,$('g-level').value,$('g-fig').value);closeAll();};
 $('g-seed').onclick=()=>genTask(A.method,$('g-level').value,$('g-fig').value,A.seed);
 $('g-5').onclick=()=>{A.series=[];for(let i=0;i<5;i++)A.series.push({m:$('g-method').value,l:$('g-level').value,s:Math.floor(Math.random()*1e9)});
@@ -1056,34 +1156,65 @@ const dl=(n,t,ty)=>{const a=document.createElement('a');a.href=URL.createObjectU
 $('e-txt').onclick=()=>dl('dokazatelstvo.txt',txtProof(),'text/plain;charset=utf-8');
 $('e-png').onclick=()=>{const a=document.createElement('a');a.download='sechenie.png';a.href=cv.toDataURL();a.click();};
 $('e-save').onclick=()=>dl('scene.json',JSON.stringify({P:A.P,F:A.F,L:A.Ln,alpha:A.alpha,goal:A.goal,proof:A.proof,
- log:A.log,size:A.size,center:A.center,maxStage:A.maxStage,figName:A.figName,taskText:A.taskText,uid}),'application/json');
+ log:A.log,size:A.size,center:A.center,maxStage:A.maxStage,figName:A.figName,taskText:A.taskText,uid,rec:A.rec,rec0:A.rec0}),'application/json');
 $('e-load').onclick=()=>$('e-file').click();
 $('e-file').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
  r.onload=()=>{try{const s=JSON.parse(r.result);Object.assign(A,{P:s.P,F:s.F,Ln:s.L,alpha:s.alpha,goal:s.goal,
-  proof:s.proof,log:s.log,size:s.size,center:s.center,maxStage:s.maxStage,figName:s.figName,taskText:s.taskText});
+  proof:s.proof,log:s.log,size:s.size,center:s.center,maxStage:s.maxStage,figName:s.figName,taskText:s.taskText,
+  rec:s.rec||null,rec0:s.rec0||s.rec||null});
   uid=s.uid;A.stage=A.maxStage;A.stageSteps=[];A.free=true;computeSection();buildPlan();fitCam(cam,W,H);say('Загружено.');}
   catch(x){say('Файл не читается.');}};r.readAsText(f);};
 const ps=$('b-preset');
-ps.innerHTML='<option value="">— свои параметры —</option>'+ALLF.map(k=>`<option value="${k}">${REC[k].t}</option>`).join('');
-$('g-fig').innerHTML='<option value="auto">Подобрать автоматически</option>'+ALLF.map(k=>`<option value="${k}">${REC[k].t}</option>`).join('');
+ps.innerHTML='<option value="">— свои параметры —</option>'+figOptions();
+$('g-fig').innerHTML='<option value="auto">Подобрать автоматически</option>'+figOptions();
 ps.onchange=()=>{if(!ps.value)return;A.free=true;A.taskText='';makeFigure(REC[ps.value]);say('Нажимай «▶ Этап».');};
 $('b-base').onchange=()=>{const v=$('b-base').value;$('b-reg').style.display=v==='reg'?'':'none';
  $('b-rect').style.display=v==='rect'?'':'none';$('b-cust').style.display=v==='custom'?'':'none';};
 $('b-body').onchange=()=>{const v=$('b-body').value;$('b-hull').style.display=v==='hull'?'':'none';
- $('b-par').style.display=v==='hull'?'none':'';};
+ $('b-par').style.display=v==='hull'?'none':'';$('b-k').closest('.fld').style.opacity=v==='frus'?'1':'.45';};
 $('b-n').oninput=()=>$('l-n').textContent=$('b-n').value;
 $('b-make').onclick=()=>{const bt=$('b-base').value;let base;
  if(bt==='reg')base=regPoly(+$('b-n').value,+$('b-R').value,+$('b-rot').value*Math.PI/180);
  else if(bt==='rect'){const a=+$('b-a').value/2,b=+$('b-b').value/2;base=[[-a,-b,0],[a,-b,0],[a,b,0],[-a,b,0]];}
  else base=$('b-pts').value.trim().split('\n').map(s=>{const[x,y]=s.trim().split(/[\s,]+/).map(Number);return[x||0,y||0,0];});
  if(base.length<3)return say('Нужно минимум 3 вершины.');
- const h=+$('b-h').value,body=$('b-body').value;base=base.map(p=>[p[0],p[1],-h/2]);
+ const h=+$('b-h').value,body=$('b-body').value,bz=body==='bipyr'?0:-h/2;
+ base=base.map(p=>[p[0],p[1],bz]);
+ const rh=(body==='prism'||body==='antiprism')?h:h/2;
  const hp=$('b-hpts').value.trim().split('\n').map(s=>{const a=s.trim().split(/[\s,]+/).map(Number);return[a[0]||0,a[1]||0,a[2]||0];});
  A.free=true;A.taskText='';
- makeFigure({base,body,h:body==='prism'?h:h/2,k:+$('b-k').value,sx:+$('b-sx').value,sy:+$('b-sy').value,hpts:hp});
+ makeFigure({base,body,h:rh,k:+$('b-k').value,sx:+$('b-sx').value,sy:+$('b-sy').value,hpts:hp});
  ps.value='';closeAll();say('Строй по этапам: «▶ Этап».');};
 $('b-step').onclick=nextStage;
 $('b-all').onclick=()=>{finishStages();say('Фигура достроена. Задай плоскость α (инструмент 9).');};
+const num=id=>{const v=+$(id).value;return Number.isFinite(v)?v:0;};
+function xfTrans(){const v=[num('x-tx'),num('x-ty'),num('x-tz')];return L(v)<1e-9?null:{k:'t',v};}
+function xfReflect(){const pl=$('x-plane').value;let n,d=num('x-d');
+ if(pl==='XY')n=[0,0,1];else if(pl==='YZ')n=[1,0,0];else if(pl==='XZ')n=[0,1,0];
+ else n=[num('x-nx'),num('x-ny'),num('x-nz')];
+ const len=L(n);if(len<1e-9)return null;
+ if(pl==='custom')d=d/len;n=ml(n,1/len);
+ return{k:'r',n,d,label:pl==='custom'?`n·x = ${rnd(d,2)}`:`${pl} (d = ${rnd(d,2)})`};}
+function xfApply(xf,copy){
+ if(!xf)return say('Задай ненулевой перенос или плоскость симметрии.');
+ if(!A.rec&&!copy)return say('Сначала построй тело.');
+ const oldName=A.figName,oldRec=A.rec0?cloneRec(A.rec0):(A.rec?cloneRec(A.rec):null);
+ if(copy){
+  const pts=A.P.filter(p=>p.kind==='vertex'&&p.hide===undefined).map(p=>p.p.slice());
+  if(!pts.length)return say('Нет вершин для построения оболочки.');
+  makeFigure({body:'hull',hpts:pts.concat(pts.map(p=>applyXf(p,[xf]))),t:`Оболочка: ${oldName}`});
+  if(oldRec)A.rec0=oldRec;
+ }else{
+  const next=cloneRec(A.rec);next.xf=(next.xf||[]).concat([xf]);makeFigure(next);
+ }
+ A.free=true;A.taskText='';ps.value='';finishStages();fitCam(cam,W,H);dirty=uiDirty=true;
+ say(copy?'Построена выпуклая оболочка преобразованного тела.':(xf.k==='t'?'Тело перенесено.':'Симметрия применена.'));}
+$('x-plane').onchange=()=>{$('x-custom').style.display=$('x-plane').value==='custom'?'':'none';};
+$('x-move').onclick=()=>xfApply(xfTrans(),false);
+$('x-copy').onclick=()=>xfApply(xfTrans(),true);
+$('x-reflect').onclick=()=>xfApply(xfReflect(),false);
+$('x-rcopy').onclick=()=>xfApply(xfReflect(),true);
+$('x-reset').onclick=()=>{if(!A.rec0)return say('Нет исходного тела.');makeFigure(A.rec0);finishStages();fitCam(cam,W,H);dirty=uiDirty=true;say('Преобразования сброшены.');};
 
 /*=========== 12. МАКЕТ: ПК / АЛЬБОМ / ПОРТРЕТ ===========*/
 function closeAll(){document.querySelectorAll('aside').forEach(a=>a.classList.remove('open'));
